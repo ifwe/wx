@@ -1,3 +1,5 @@
 *.swp
 build/msw/vc_*/
 lib/vc_dll/
+makefile.vc
+
