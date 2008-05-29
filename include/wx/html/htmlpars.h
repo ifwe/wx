@@ -222,12 +222,12 @@ public:
     //                  false etherwise
     virtual bool HandleTag(const wxHtmlTag& tag) = 0;
 
-protected:
     // parses input between beginning and ending tag.
     // m_Parser must be set.
     void ParseInner(const wxHtmlTag& tag)
         { m_Parser->DoParsing(tag.GetBeginPos(), tag.GetEndPos1()); }
 
+protected:
     // Parses given source as if it was tag's inner code (see
     // wxHtmlParser::GetInnerSource).  Unlike ParseInner(), this method lets
     // you specify the source code to parse. This is useful when you need to

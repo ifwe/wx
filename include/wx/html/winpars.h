@@ -261,6 +261,8 @@ public:
     wxHtmlWinTagHandler() : wxHtmlTagHandler() {}
 
     virtual void SetParser(wxHtmlParser *parser) {wxHtmlTagHandler::SetParser(parser); m_WParser = (wxHtmlWinParser*) parser;}
+    wxHtmlWinParser* GetParser() const { return m_WParser; }
+
 
 protected:
     wxHtmlWinParser *m_WParser; // same as m_Parser, but overcasted
