@@ -53,9 +53,11 @@ void wxPopupWindow::DoGetPosition(int *x, int *y) const
     // the position of a "top level" window such as this should be in
     // screen coordinates, not in the client ones which MSW gives us
     // (because we are a child window)
-    wxPopupWindowBase::DoGetPosition(x, y);
 
-    GetParent()->ClientToScreen(x, y);
+    RECT rect;
+    GetWindowRect(static_cast<HWND>(GetHWND()), &rect);
+    *x = rect.left;
+    *y = rect.top;
 }
 
 WXDWORD wxPopupWindow::MSWGetStyle(long flags, WXDWORD *exstyle) const
