@@ -313,6 +313,11 @@ wxString wxStandardPaths::GetPluginsDir() const
     return GetAppDir();
 }
 
+wxString wxStandardPaths::GetSpecialFolder(int csidl) const
+{
+    return DoGetDirectory(csidl);
+}
+
 // ============================================================================
 // wxStandardPathsWin16 implementation
 // ============================================================================
