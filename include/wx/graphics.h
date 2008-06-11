@@ -407,7 +407,7 @@ public:
 
     virtual ~wxGraphicsContext();
 
-    static wxGraphicsContext* Create( const wxWindowDC& dc) ;
+    static wxGraphicsContext* Create( const wxDC& dc) ;
 
 #ifdef __WXMSW__
     static wxGraphicsContext * Create( const wxMemoryDC& dc) ;
@@ -439,9 +439,9 @@ public:
 
     // sets the font
     virtual wxGraphicsFont CreateFont( const wxFont &font , const wxColour &col = *wxBLACK ) const;
-    
+
     virtual wxGraphicsBitmap CreateBitmap( const wxBitmap &bitmap ) const;
-    
+
     //virtual wxGraphicsBitmap CreateSubBitmap( const wxGraphicsBitmap &bitmap, wxDouble x, wxDouble y, wxDouble w, wxDouble h  ) const;
 
     // create a 'native' matrix corresponding to these values
@@ -539,7 +539,7 @@ public:
 
     virtual void GetMultiLineTextExtent(const wxString& text, wxDouble *x, wxDouble *y,
         wxDouble *h) const;
-        
+
     virtual void GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const = 0;
 
     //
@@ -645,7 +645,7 @@ public :
 
     // Context
 
-    virtual wxGraphicsContext * CreateContext( const wxWindowDC& dc) = 0 ;
+    virtual wxGraphicsContext * CreateContext( const wxDC& dc) = 0 ;
 #ifdef __WXMSW__
     virtual wxGraphicsContext * CreateContext( const wxMemoryDC& dc) = 0 ;
 #endif

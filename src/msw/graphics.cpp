@@ -178,7 +178,7 @@ public :
     // gets the component valuess of the matrix
     virtual void Get(wxDouble* a=NULL, wxDouble* b=NULL,  wxDouble* c=NULL,
                      wxDouble* d=NULL, wxDouble* tx=NULL, wxDouble* ty=NULL) const;
-       
+
     // makes this the inverse matrix
     virtual void Invert();
 
@@ -656,7 +656,7 @@ wxGDIPlusFontData::~wxGDIPlusFontData()
     delete m_font;
 }
 
-wxGDIPlusBitmapData::wxGDIPlusBitmapData( wxGraphicsRenderer* renderer, 
+wxGDIPlusBitmapData::wxGDIPlusBitmapData( wxGraphicsRenderer* renderer,
                         const wxBitmap &bmp) : wxGraphicsObjectRefData( renderer )
 {
     m_bitmap = NULL;
@@ -1213,7 +1213,7 @@ void wxGDIPlusContext::DrawIcon( const wxIcon &icon, wxDouble x, wxDouble y, wxD
 
         interim.LockBits(&bounds, ImageLockModeRead,
             interim.GetPixelFormat(),&data);
-        
+
         bool hasAlpha = false;
         for ( size_t y = 0 ; y < height && !hasAlpha ; ++y)
         {
@@ -1289,7 +1289,7 @@ void wxGDIPlusContext::GetTextExtent( const wxString &str, wxDouble *width, wxDo
     {
         RectF layoutRect(0,0, 100000.0f, 100000.0f);
         StringFormat strFormat( StringFormat::GenericTypographic() );
-        strFormat.SetFormatFlags( StringFormatFlagsMeasureTrailingSpaces | strFormat.GetFormatFlags() ); 
+        strFormat.SetFormatFlags( StringFormatFlagsMeasureTrailingSpaces | strFormat.GetFormatFlags() );
 
         RectF bounds ;
         m_context->MeasureString((const wchar_t *) s , wcslen(s) , f, layoutRect, &strFormat, &bounds ) ;
@@ -1322,7 +1322,7 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
         ranges[i].Length = 1 ;
     }
     strFormat.SetMeasurableCharacterRanges(len,ranges);
-    strFormat.SetFormatFlags( StringFormatFlagsMeasureTrailingSpaces | strFormat.GetFormatFlags() ); 
+    strFormat.SetFormatFlags( StringFormatFlagsMeasureTrailingSpaces | strFormat.GetFormatFlags() );
     m_context->MeasureCharacterRanges(ws, -1 , f,layoutRect, &strFormat,1,regions) ;
 
     RectF bbox ;
@@ -1334,7 +1334,7 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
 }
 
 bool wxGDIPlusContext::ShouldOffset() const
-{     
+{
     int penwidth = 0 ;
     if ( !m_pen.IsNull() )
     {
@@ -1392,7 +1392,7 @@ public :
 
     // Context
 
-    virtual wxGraphicsContext * CreateContext( const wxWindowDC& dc);
+    virtual wxGraphicsContext * CreateContext( const wxDC& dc);
 
     virtual wxGraphicsContext * CreateContext( const wxMemoryDC& dc);
 
@@ -1479,7 +1479,7 @@ void wxGDIPlusRenderer::Unload()
         GdiplusShutdown(m_gditoken);
 }
 
-wxGraphicsContext * wxGDIPlusRenderer::CreateContext( const wxWindowDC& dc)
+wxGraphicsContext * wxGDIPlusRenderer::CreateContext( const wxDC& dc)
 {
     EnsureIsLoaded();
     return new wxGDIPlusContext(this,(HDC) dc.GetHDC());
