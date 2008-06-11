@@ -292,6 +292,24 @@ wxTextCtrl::~wxTextCtrl()
     delete m_privateContextMenu;
 }
 
+wxPoint wxTextCtrl::IndexToCoords(long pos) const
+{
+    POINTL ptReal;
+    ptReal.x = -1;
+    ptReal.y = -1;
+
+#if wxUSE_RICHEDIT
+    // FIXME: we need to distinguish between richedit 2 and 3 here somehow but
+    //        we don't know how to do it
+    if ( IsRich() )
+        ::SendMessage(GetHwnd(), EM_POSFROMCHAR, (WPARAM)&ptReal, pos);
+#else
+    fprintf(stderr, "warning: IndexToCoords not implemented for !wxUSE_RICHEDIT");
+#endif
+
+    return wxPoint(ptReal.x, ptReal.y);
+}
+
 bool wxTextCtrl::Create(wxWindow *parent,
                         wxWindowID id,
                         const wxString& value,

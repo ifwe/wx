@@ -388,6 +388,8 @@ public:
                                             wxTextCoord *col,
                                             wxTextCoord *row) const;
 
+    virtual wxPoint IndexToCoords(long WXUNUSED(pos)) const { return wxPoint(); };
+
     // Clipboard operations
     virtual void Copy() = 0;
     virtual void Cut() = 0;

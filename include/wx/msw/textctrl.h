@@ -107,6 +107,8 @@ public:
         return wxTextCtrlBase::HitTest(pt, col, row);
     }
 
+    virtual wxPoint IndexToCoords(long pos) const;
+
     // Clipboard operations
     virtual void Copy();
     virtual void Cut();
