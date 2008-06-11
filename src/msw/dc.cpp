@@ -1125,13 +1125,13 @@ void wxDC::DoDrawEllipticArc(wxCoord x,wxCoord y,wxCoord w,wxCoord h,double sa,d
 
     // Swap start and end positions if the end angle is less than the start angle.
     if (ea < sa) {
-	int temp;
-	temp = rx2;
-	rx2 = rx1;
-	rx1 = temp;
-	temp = ry2;
-	ry2 = ry1;
-	ry1 = temp;
+        int temp;
+        temp = rx2;
+        rx2 = rx1;
+        rx1 = temp;
+        temp = ry2;
+        ry2 = ry1;
+        ry1 = temp;
     }
 
     // draw pie with NULL_PEN first and then outline otherwise a line is
@@ -1774,7 +1774,7 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
     // accounts for under/overhang of the first/last character while we want
     // just the bounding rect for this string so adjust the width as needed
     // (using API not available in 2002 SDKs of WinCE)
-    if ( len > 0 )
+    if ( len > 1 )
     {
         ABC width;
         const wxChar chFirst = *string.begin();
