@@ -6,24 +6,10 @@
     <set var="WX_DISABLE_PRECOMP_HEADERS">1</set>
     <include file="../../../build/bakefiles/common_contrib.bkl"/>
 
-    <set var="STC_SRC">
-        <!-- wx binding: -->
-        PlatWX.cpp
-        ScintillaWX.cpp
-        stc.cpp
-        <!-- Scintilla: -->
-        scintilla/src/AutoComplete.cxx
-        scintilla/src/CallTip.cxx
-        scintilla/src/CellBuffer.cxx
-        scintilla/src/CharClassify.cxx
-        scintilla/src/ContractionState.cxx
-        scintilla/src/Document.cxx
-        scintilla/src/DocumentAccessor.cxx
-        scintilla/src/Editor.cxx
-        scintilla/src/ExternalLexer.cxx
-        scintilla/src/Indicator.cxx
-        scintilla/src/KeyMap.cxx
-        scintilla/src/KeyWords.cxx
+    <set var="STC_LEX_SRC">
+        scintilla/src/LexPython.cxx
+
+    <!--
         scintilla/src/LexAPDL.cxx
         scintilla/src/LexAU3.cxx
         scintilla/src/LexAVE.cxx
@@ -68,7 +54,6 @@
         scintilla/src/LexPS.cxx
         scintilla/src/LexPascal.cxx
         scintilla/src/LexPerl.cxx
-        scintilla/src/LexPython.cxx
         scintilla/src/LexRebol.cxx
         scintilla/src/LexRuby.cxx
         scintilla/src/LexSQL.cxx
@@ -83,6 +68,29 @@
         scintilla/src/LexVHDL.cxx
         scintilla/src/LexVerilog.cxx
         scintilla/src/LexYAML.cxx
+    -->
+    </set>
+
+
+    <set var="STC_SRC">
+        <!-- wx binding: -->
+        PlatWX.cpp
+        ScintillaWX.cpp
+        stc.cpp
+        <!-- Scintilla: -->
+        scintilla/src/AutoComplete.cxx
+        scintilla/src/CallTip.cxx
+        scintilla/src/CellBuffer.cxx
+        scintilla/src/CharClassify.cxx
+        scintilla/src/ContractionState.cxx
+        scintilla/src/Document.cxx
+        scintilla/src/DocumentAccessor.cxx
+        scintilla/src/Editor.cxx
+        scintilla/src/ExternalLexer.cxx
+        scintilla/src/Indicator.cxx
+        scintilla/src/KeyMap.cxx
+        scintilla/src/KeyWords.cxx
+        $(STC_LEX_SRC)
         scintilla/src/LineMarker.cxx
         scintilla/src/PropSet.cxx
         scintilla/src/RESearch.cxx
