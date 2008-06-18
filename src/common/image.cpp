@@ -2174,7 +2174,7 @@ int wxImage::GetImageCount( wxInputStream &stream, long type )
 
         }
 
-        wxLogWarning(_("No handler found for image type."));
+        wxFAIL_MSG(_("No handler found for image type."));
         return 0;
     }
 
@@ -2217,7 +2217,7 @@ bool wxImage::LoadFile( wxInputStream& stream, long type, int index )
 
         }
 
-        wxLogWarning( _("No handler found for image type.") );
+        wxFAIL_MSG( _("No handler found for image type.") );
         return false;
     }
 
