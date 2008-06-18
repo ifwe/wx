@@ -206,7 +206,11 @@
         <msvc-headers>$(QA_HDR)</msvc-headers>
         <library>coredll</library>
         <library>basedll</library>
-        <library>xmldll</library>
+        <!--
+        <library>xmldll</library> 
+        disabled since MSVC does not create the XML library when there are
+        no exports (i.e., wxUSE_XML is off
+        -->
     </dll>
 
     <lib id="qalib" template="wx_lib"
