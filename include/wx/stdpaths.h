@@ -125,6 +125,8 @@ public:
     // return the temporary directory for the current user
     virtual wxString GetTempDir() const;
 
+    virtual wxString GetSpecialFolder(int) const { return wxString(); }
+
 
     // virtual dtor for the base class
     virtual ~wxStandardPathsBase();
