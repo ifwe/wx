@@ -19,6 +19,7 @@
 #include "wx/geometry.h"
 #include "wx/dynarray.h"
 
+class WXDLLIMPEXP_CORE wxDC;
 class WXDLLIMPEXP_CORE wxWindowDC;
 class WXDLLIMPEXP_CORE wxMemoryDC;
 class WXDLLIMPEXP_CORE wxGraphicsContext;
