@@ -1265,6 +1265,9 @@ HWND wxTLWHiddenParentModule::ms_hwnd = NULL;
 
 const wxChar *wxTLWHiddenParentModule::ms_className = NULL;
 
+#include <vector>
+static std::vector<HWND> gs_hiddenParents;
+
 bool wxTLWHiddenParentModule::OnInit()
 {
     ms_hwnd = NULL;
@@ -1275,15 +1278,11 @@ bool wxTLWHiddenParentModule::OnInit()
 
 void wxTLWHiddenParentModule::OnExit()
 {
-    if ( ms_hwnd )
-    {
-        if ( !::DestroyWindow(ms_hwnd) )
-        {
+    for (size_t i = 0; i < gs_hiddenParents.size(); ++i)
+        if (!::DestroyWindow(gs_hiddenParents[i]))
             wxLogLastError(_T("DestroyWindow(hidden TLW parent)"));
-        }
 
-        ms_hwnd = NULL;
-    }
+    gs_hiddenParents.clear();
 
     if ( ms_className )
     {
@@ -1299,36 +1298,34 @@ void wxTLWHiddenParentModule::OnExit()
 /* static */
 HWND wxTLWHiddenParentModule::GetHWND()
 {
-    if ( !ms_hwnd )
+    if ( !ms_className )
     {
-        if ( !ms_className )
+        static const wxChar *HIDDEN_PARENT_CLASS = _T("wxTLWHiddenParent");
+
+        WNDCLASS wndclass;
+        wxZeroMemory(wndclass);
+
+        wndclass.lpfnWndProc   = DefWindowProc;
+        wndclass.hInstance     = wxGetInstance();
+        wndclass.lpszClassName = HIDDEN_PARENT_CLASS;
+
+        if ( !::RegisterClass(&wndclass) )
         {
-            static const wxChar *HIDDEN_PARENT_CLASS = _T("wxTLWHiddenParent");
-
-            WNDCLASS wndclass;
-            wxZeroMemory(wndclass);
-
-            wndclass.lpfnWndProc   = DefWindowProc;
-            wndclass.hInstance     = wxGetInstance();
-            wndclass.lpszClassName = HIDDEN_PARENT_CLASS;
-
-            if ( !::RegisterClass(&wndclass) )
-            {
-                wxLogLastError(_T("RegisterClass(\"wxTLWHiddenParent\")"));
-            }
-            else
-            {
-                ms_className = HIDDEN_PARENT_CLASS;
-            }
+            wxLogLastError(_T("RegisterClass(\"wxTLWHiddenParent\")"));
         }
-
-        ms_hwnd = ::CreateWindow(ms_className, wxEmptyString, 0, 0, 0, 0, 0, NULL,
-                                 (HMENU)NULL, wxGetInstance(), NULL);
-        if ( !ms_hwnd )
+        else
         {
-            wxLogLastError(_T("CreateWindow(hidden TLW parent)"));
+            ms_className = HIDDEN_PARENT_CLASS;
         }
     }
 
-    return ms_hwnd;
+    HWND hwnd = ::CreateWindow(ms_className, wxEmptyString, 0, 0, 0, 0, 0, NULL,
+                               (HMENU)NULL, wxGetInstance(), NULL);
+
+    if (!hwnd)
+        wxLogLastError(_T("CreateWindow(hidden TLW parent)"));
+    else
+        gs_hiddenParents.push_back(hwnd);
+
+    return hwnd;
 }
