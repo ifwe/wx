@@ -703,6 +703,53 @@ bool wxTopLevelWindowMSW::Show(bool show)
     return true;
 }
 
+bool wxTopLevelWindowMSW::ShowNoActivate(bool show)
+{
+    // don't use wxWindow version as we want to call DoShowWindow() ourselves
+    if ( !wxWindowBase::Show(show) )
+        return false;
+
+    int nShowCmd;
+    if ( show )
+    {
+        if ( m_maximizeOnShow )
+        {
+            // show and maximize
+            nShowCmd = SW_MAXIMIZE;
+
+            // This is necessary, or no window appears
+#if defined( __WINCE_STANDARDSDK__) || defined(__SMARTPHONE__)
+            DoShowWindow(SW_SHOW);
+#endif
+
+            m_maximizeOnShow = false;
+        }
+        else // just show
+        {
+            nShowCmd = SW_SHOWNA;
+        }
+    }
+    else // hide
+    {
+        nShowCmd = SW_HIDE;
+    }
+
+    DoShowWindow(nShowCmd);
+
+#if defined(__WXWINCE__) && (_WIN32_WCE >= 400 && !defined(__POCKETPC__) && !defined(__SMARTPHONE__))
+    // Addornments have to be added when the frame is the correct size
+    wxFrame* frame = wxDynamicCast(this, wxFrame);
+    if (frame && frame->GetMenuBar())
+        frame->GetMenuBar()->AddAdornments(GetWindowStyleFlag());
+#endif
+
+    // we only set pending size if we're maximized before being shown, now that
+    // we're shown we don't need it any more (it is reset in size event handler
+    // for child windows but we have to do it ourselves for this parent window)
+    m_pendingSize = wxDefaultSize;
+
+    return true;
+}
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowMSW maximize/minimize
 // ----------------------------------------------------------------------------
