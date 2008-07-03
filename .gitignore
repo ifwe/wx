@@ -1,6 +1,8 @@
 *.swp
 build/msw/vc_*/
 lib/vc_dll/
+contrib/build/stc/vc_mswudll/
+build/msw/config.vc
 *.vc
 *.bcc
 *.gcc
