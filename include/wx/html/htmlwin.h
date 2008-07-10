@@ -259,6 +259,9 @@ public:
                 long style = wxHW_SCROLLBAR_AUTO,
                 const wxString& name = wxT("htmlWindow"));
 
+    void SetMaxWordLength(int length);
+    int GetMaxWordLength() const;
+
     // Set HTML page and display it. !! source is HTML document itself,
     // it is NOT address/filename of HTML document. If you want to
     // specify document location, use LoadPage() istead

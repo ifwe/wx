@@ -615,6 +615,17 @@ bool wxHtmlWindow::LoadPage(const wxString& location)
 }
 
 
+void wxHtmlWindow::SetMaxWordLength(int length)
+{
+	wxHtmlCell::m_maxWordLength = length;
+}
+
+int wxHtmlWindow::GetMaxWordLength() const
+{
+	return wxHtmlCell::m_maxWordLength;
+}
+
+
 bool wxHtmlWindow::LoadFile(const wxFileName& filename)
 {
     wxString url = wxFileSystem::FileNameToURL(filename);

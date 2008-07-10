@@ -29,6 +29,8 @@
 
 #include <stdlib.h>
 
+int wxHtmlCell::m_maxWordLength = -1;
+
 //-----------------------------------------------------------------------------
 // Helper classes
 //-----------------------------------------------------------------------------
@@ -356,6 +358,19 @@ wxHtmlWordCell::wxHtmlWordCell(const wxString& word, const wxDC& dc) : wxHtmlCel
 {
     m_Word = word;
     dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
+
+    if (wxHtmlCell::m_maxWordLength != -1) {
+    	if (m_Width > wxHtmlCell::m_maxWordLength) {
+	    	while (m_Word.length() && m_Width > wxHtmlCell::m_maxWordLength) {
+	    		m_Word.RemoveLast();
+	    		dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
+	    	}
+
+	    	m_Word.Append(wxT("..."));
+	    	dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
+    	}
+    }
+
     SetCanLiveOnPagebreak(false);
     m_allowLinebreak = true;
 }

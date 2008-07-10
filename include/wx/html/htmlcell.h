@@ -329,6 +329,8 @@ public:
     virtual wxString ConvertToText(wxHtmlSelection *WXUNUSED(sel)) const
         { return wxEmptyString; }
 
+    static int m_maxWordLength;
+
 protected:
     // pointer to the next cell
     wxHtmlCell *m_Next;
@@ -379,6 +381,7 @@ public:
     bool IsLinebreakAllowed() const { return m_allowLinebreak; }
 
     void SetPreviousWord(wxHtmlWordCell *cell);
+    wxString GetWord() const { return m_Word; }
 
 protected:
     void SetSelectionPrivPos(const wxDC& dc, wxHtmlSelection *s) const;
