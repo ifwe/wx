@@ -8,4 +8,7 @@ build/msw/config.vc
 *.gcc
 *.wat
 
+.bakefile_gen.stat
+*.pyc
+
 
