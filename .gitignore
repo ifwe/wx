@@ -2,13 +2,15 @@
 build/msw/vc_*/
 lib/vc_dll/
 contrib/build/stc/vc_mswudll/
+contrib/build/stc/vc_mswuhdll/
+include/wx/msw/setup.h
 build/msw/config.vc
 *.vc
 *.bcc
 *.gcc
 *.wat
 
-.bakefile_gen.stat
+.bakefile_gen.state
 *.pyc
 
 
