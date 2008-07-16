@@ -968,7 +968,12 @@ void wxTopLevelWindowMSW::DoSelectAndSetIcon(const wxIconBundle& icons,
     const wxIcon icon = icons.GetIcon(size);
     if ( icon.Ok() && icon.GetWidth() == size.x && icon.GetHeight() == size.y )
     {
-        ::SendMessage(GetHwnd(), WM_SETICON, i, (LPARAM)GetHiconOf(icon));
+        WXHWND hwnd = GetHwnd();
+        while (hwnd)
+        {
+            ::SendMessage((HWND)hwnd, WM_SETICON, i, (LPARAM)GetHiconOf(icon));
+            hwnd = (WXHWND)::GetWindowLong((HWND)hwnd, GWL_HWNDPARENT);
+        }
     }
 }
 
