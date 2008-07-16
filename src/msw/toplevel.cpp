@@ -125,6 +125,10 @@ BEGIN_EVENT_TABLE(wxTopLevelWindowMSW, wxTopLevelWindowBase)
     EVT_ACTIVATE(wxTopLevelWindowMSW::OnActivate)
 END_EVENT_TABLE()
 
+#include <algorithm>
+#include <vector>
+static std::vector<HWND> gs_hiddenParents;
+
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowMSW creation
 // ----------------------------------------------------------------------------
@@ -968,12 +972,15 @@ void wxTopLevelWindowMSW::DoSelectAndSetIcon(const wxIconBundle& icons,
     const wxIcon icon = icons.GetIcon(size);
     if ( icon.Ok() && icon.GetWidth() == size.x && icon.GetHeight() == size.y )
     {
-        WXHWND hwnd = GetHwnd();
-        while (hwnd)
-        {
-            ::SendMessage((HWND)hwnd, WM_SETICON, i, (LPARAM)GetHiconOf(icon));
-            hwnd = (WXHWND)::GetWindowLong((HWND)hwnd, GWL_HWNDPARENT);
-        }
+        // set this window
+        HWND hwnd = (HWND)GetHwnd();
+        ::SendMessage(hwnd, WM_SETICON, i, (LPARAM)GetHiconOf(icon));
+
+        // if our parent is a hidden parent because of wxFRAME_NO_TASKBAR, set its
+        // icon too
+        hwnd = (HWND)::GetWindowLong((HWND)hwnd, GWL_HWNDPARENT);
+        if (gs_hiddenParents.end() != std::find(gs_hiddenParents.begin(), gs_hiddenParents.end(), hwnd))
+            ::SendMessage(hwnd, WM_SETICON, i, (LPARAM)GetHiconOf(icon));
     }
 }
 
@@ -1269,9 +1276,6 @@ wxDlgProc(HWND hDlg,
 HWND wxTLWHiddenParentModule::ms_hwnd = NULL;
 
 const wxChar *wxTLWHiddenParentModule::ms_className = NULL;
-
-#include <vector>
-static std::vector<HWND> gs_hiddenParents;
 
 bool wxTLWHiddenParentModule::OnInit()
 {
