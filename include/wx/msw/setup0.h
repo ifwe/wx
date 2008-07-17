@@ -12,6 +12,9 @@
 #ifndef _WX_SETUP_H_
 #define _WX_SETUP_H_
 
+#define wxUSE_TASKBARICON 1
+#define wxUSE_TASKBARICON_BALLOONS 1
+
 /* --- start common options --- */
 // ----------------------------------------------------------------------------
 // global settings
