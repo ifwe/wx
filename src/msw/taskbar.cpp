@@ -62,7 +62,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxTaskBarIcon, wxEvtHandler)
 // start under this OS
 static BOOL wxShellNotifyIcon(DWORD dwMessage, NOTIFYICONDATA *pData)
 {
-#if 0 && wxUSE_DYNLIB_CLASS
+#if wxUSE_DYNLIB_CLASS
     typedef BOOL (WINAPI *Shell_NotifyIcon_t)(DWORD, NOTIFYICONDATA *);
 
     static Shell_NotifyIcon_t s_pfnShell_NotifyIcon = NULL;
