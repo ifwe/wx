@@ -245,6 +245,11 @@ public:
                                        wxDC& dc,
                                        const wxRect& rect,
                                        int flags = 0) = 0;
+    
+    virtual void DrawFocusRect(wxWindow *win,
+    						   wxDC& dc,
+    						   const wxRect& rect,
+    						   int flags = 0) = 0;
 
     // geometry functions
     // ------------------
@@ -378,6 +383,12 @@ public:
                                        const wxRect& rect,
                                        int flags = 0 )
         { m_rendererNative.DrawItemSelectionRect( win, dc, rect, flags ); }
+    
+    virtual void DrawFocusRect(wxWindow* win,
+    						   wxDC& dc,
+    						   const wxRect& rect,
+    						   int flags = 0)
+        { m_rendererNative.DrawFocusRect( win, dc, rect, flags ); }
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win)
         { return m_rendererNative.GetSplitterParams(win); }

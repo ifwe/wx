@@ -103,6 +103,11 @@ public:
                                        wxDC& dc,
                                        const wxRect& rect,
                                        int flags = 0);
+    
+    virtual void DrawFocusRect(wxWindow *win,
+    		                   wxDC& dc,
+    		                   const wxRect& rect,
+    		                   int flags = 0);
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 
@@ -659,6 +664,17 @@ wxRendererGeneric::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
     dc.SetPen(flags & wxCONTROL_CURRENT ? *wxBLACK_PEN : *wxTRANSPARENT_PEN);
 
     dc.DrawRectangle( rect );
+}
+
+void
+wxRendererGeneric::DrawFocusRect(wxWindow * WXUNUSED(win),
+								 wxDC& dc,
+								 const wxRect& rect,
+								 int flags)
+{	
+	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	dc.SetPen(wxPen(*wxBLACK, 1, wxDOT_DASH));
+	dc.DrawRectangle(rect);
 }
 
 

@@ -170,6 +170,11 @@ public:
                                 wxDC& dc,
                                 const wxRect& rect,
                                 int flags = 0);
+    
+    virtual void DrawFocusRect(wxWindow *win,
+    						   wxDC& dc,
+    						   const wxRect& rect,
+    						   int flags = 0);
 
 private:
     DECLARE_NO_COPY_CLASS(wxRendererMSW)
@@ -223,6 +228,11 @@ public:
                                 wxDC& dc,
                                 const wxRect& rect,
                                 int flags = 0);
+    
+    virtual void DrawFocusRect(wxWindow *win,
+    		                   wxDC& dc,
+    		                   const wxRect& rect,
+    		                   int flags = 0);
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 private:
@@ -303,6 +313,18 @@ wxRendererMSW::DrawPushButton(wxWindow * WXUNUSED(win),
     wxCopyRectToRECT(rect, rc);
 
     ::DrawFrameControl(GraphicsHDC(&dc), &rc, DFC_BUTTON, style);
+}
+
+void
+wxRendererMSW::DrawFocusRect(wxWindow * WXUNUSED(win),
+		                     wxDC& dc,
+		                     const wxRect& rect,
+		                     int flags)
+{
+	RECT rc;
+	wxCopyRectToRECT(rect, rc);
+	
+	::DrawFocusRect(GraphicsHDC(&dc), &rc);
 }
 
 // ============================================================================
@@ -538,6 +560,14 @@ wxRendererXP::DrawPushButton(wxWindow * win,
                                 &r,
                                 NULL
                             );
+}
+
+void wxRendererXP::DrawFocusRect(wxWindow * win,
+		                         wxDC& dc,
+		                         const wxRect& rect,
+		                         int flags)
+{
+	m_rendererNative.DrawFocusRect(win, dc, rect, flags);
 }
 
 // ----------------------------------------------------------------------------

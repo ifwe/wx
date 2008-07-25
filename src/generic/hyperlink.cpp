@@ -37,10 +37,11 @@
     #include "wx/dcclient.h"
     #include "wx/menu.h"
     #include "wx/log.h"
-    #include "wx/dataobj.h"
+    #include "wx/dataobj.h"	
 #endif
 
 #include "wx/clipbrd.h"
+#include "wx/renderer.h"
 
 // ============================================================================
 // implementation
@@ -64,9 +65,12 @@ BEGIN_EVENT_TABLE(wxHyperlinkCtrl, wxControl)
     EVT_LEFT_DOWN(wxHyperlinkCtrl::OnLeftDown)
     EVT_LEFT_UP(wxHyperlinkCtrl::OnLeftUp)
     EVT_RIGHT_UP(wxHyperlinkCtrl::OnRightUp)
+    EVT_KEY_DOWN(wxHyperlinkCtrl::OnKey)
     EVT_MOTION(wxHyperlinkCtrl::OnMotion)
     EVT_LEAVE_WINDOW(wxHyperlinkCtrl::OnLeaveWindow)
     EVT_SIZE(wxHyperlinkCtrl::OnSize)
+    EVT_SET_FOCUS(wxHyperlinkCtrl::OnFocus)
+    EVT_KILL_FOCUS(wxHyperlinkCtrl::OnFocus)
 
     // for the context menu
     EVT_MENU(wxHYPERLINKCTRL_POPUP_COPY_ID, wxHyperlinkCtrl::OnPopUpCopy)
@@ -194,6 +198,9 @@ void wxHyperlinkCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
     dc.SetTextBackground(GetBackgroundColour());
 
     dc.DrawText(GetLabel(), GetLabelRect().GetTopLeft());
+    
+    if (wxWindow::FindFocus() == this)
+    	wxRendererNative::Get().DrawFocusRect(this, dc, GetLabelRect());    	
 }
 
 void wxHyperlinkCtrl::OnLeftDown(wxMouseEvent& event)
@@ -224,6 +231,22 @@ void wxHyperlinkCtrl::OnRightUp(wxMouseEvent& event)
     if( GetWindowStyle() & wxHL_CONTEXTMENU )
         if ( GetLabelRect().Contains(event.GetPosition()) )
             DoContextMenu(wxPoint(event.m_x, event.m_y));
+}
+
+void wxHyperlinkCtrl::OnKey(wxKeyEvent& event)
+{
+	event.Skip();
+	
+	if (event.GetKeyCode() == WXK_SPACE)
+	{
+		if (wxWindow::FindFocus() == this)
+		{
+		    wxHyperlinkEvent linkEvent(this, GetId(), m_url);
+		    if (!GetEventHandler()->ProcessEvent(linkEvent))     // was the event skipped ?
+		        if (!wxLaunchDefaultBrowser(m_url))
+		            wxLogWarning(wxT("Could not launch the default browser with url '%s' !"), m_url.c_str());
+		}
+	}
 }
 
 void wxHyperlinkCtrl::OnMotion(wxMouseEvent& event)
@@ -279,6 +302,11 @@ void wxHyperlinkCtrl::OnSize(wxSizeEvent& WXUNUSED(event))
     // update the position of the label in the screen respecting
     // the selected align flag
     Refresh();
+}
+
+void wxHyperlinkCtrl::OnFocus(wxFocusEvent& WXUNUSED(event))
+{
+	Refresh();
 }
 
 #endif // wxUSE_HYPERLINKCTRL

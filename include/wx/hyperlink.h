@@ -114,6 +114,8 @@ protected:
     // of the label, a HyperlinkEvent is fired.
     void OnLeftUp(wxMouseEvent& event);
     void OnRightUp(wxMouseEvent& event);
+    
+    void OnKey(wxKeyEvent& event);
 
     // Changes the cursor to a hand, if the mouse is inside the label's
     // bounding box.
@@ -127,7 +129,9 @@ protected:
 
     // Refreshes the control to update label's position if necessary
     void OnSize(wxSizeEvent& event);
-
+    
+    // Refreshes the control to show a focus rect
+    void OnFocus(wxFocusEvent& event);
 
     // overridden base class virtuals
 
