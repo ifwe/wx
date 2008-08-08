@@ -128,6 +128,7 @@ END_EVENT_TABLE()
 #include <algorithm>
 #include <vector>
 static std::vector<HWND> gs_hiddenParents;
+static std::vector<HWND> gs_hiddenParentsDelete;
 
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowMSW creation
@@ -156,6 +157,8 @@ void wxTopLevelWindowMSW::Init()
     info->cbSize = sizeof(SHACTIVATEINFO);
 
     m_activateInfo = (void*) info;
+    
+    m_hiddenParent = 0;
 #endif
 }
 
@@ -316,7 +319,8 @@ WXHWND wxTopLevelWindowMSW::MSWGetParent() const
     if ( HasFlag(wxFRAME_NO_TASKBAR) && !hwndParent )
     {
         // use hidden parent
-        hwndParent = wxTLWHiddenParentModule::GetHWND();
+    	hwndParent = wxTLWHiddenParentModule::GetHWND();
+    	((wxTopLevelWindowMSW*)this)->m_hiddenParent = (WXHWND)hwndParent;
     }
 
     return (WXHWND)hwndParent;
@@ -638,6 +642,12 @@ wxTopLevelWindowMSW::~wxTopLevelWindowMSW()
         {
             ::BringWindowToTop(GetHwndOf(parent));
         }
+    }
+    
+    if (m_hiddenParent)
+    {
+    	gs_hiddenParentsDelete.push_back((HWND)m_hiddenParent);
+    	m_hiddenParent = 0;
     }
 }
 
@@ -1306,28 +1316,17 @@ void wxTLWHiddenParentModule::OnExit()
 
 static void removeOldHiddenParents()
 {
-	std::vector<HWND>::iterator iter = gs_hiddenParents.begin();
-    while (iter != gs_hiddenParents.end()) {    	
-    	HWND hiddenHwnd = *iter;
-	    wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetLast();
-	    while (node) {
-	        wxWindow* win = node->GetData();
-	        
-	        HWND parentHwnd = ::GetParent((HWND)win->GetHWND());
-	        if (parentHwnd == hiddenHwnd)
-	        	goto next;
-	        
-	        node = node->GetPrevious();
-	    }	    
-	    
-	    iter = gs_hiddenParents.erase(iter);
-	    if (!::DestroyWindow(hiddenHwnd))
-	    	wxLogLastError(_T("DestroyWindow(cleaning up hidden TLW parent)"));
-	    continue;
-	    
-	    next:
-	    iter++;
-    }
+	for(std::vector<HWND>::iterator iter = gs_hiddenParentsDelete.begin();
+	    iter != gs_hiddenParentsDelete.end();
+	    ++iter)
+	{
+		::DestroyWindow(*iter);
+		std::vector<HWND>::iterator i2 = find(gs_hiddenParents.begin(), gs_hiddenParents.end(), *iter);
+		if (i2 != gs_hiddenParents.end())
+			gs_hiddenParents.erase(i2);
+	}
+	
+	gs_hiddenParentsDelete.clear();
 }
 
 /* static */

@@ -190,6 +190,8 @@ private:
 #if defined(__SMARTPHONE__) || defined(__POCKETPC__)
     void* m_activateInfo;
 #endif
+    
+    WXHWND m_hiddenParent;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxTopLevelWindowMSW)
