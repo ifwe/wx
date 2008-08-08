@@ -1304,6 +1304,32 @@ void wxTLWHiddenParentModule::OnExit()
     }
 }
 
+static void removeOldHiddenParents()
+{
+	std::vector<HWND>::iterator iter = gs_hiddenParents.begin();
+    while (iter != gs_hiddenParents.end()) {    	
+    	HWND hiddenHwnd = *iter;
+	    wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetLast();
+	    while (node) {
+	        wxWindow* win = node->GetData();
+	        
+	        HWND parentHwnd = ::GetParent((HWND)win->GetHWND());
+	        if (parentHwnd == hiddenHwnd)
+	        	goto next;
+	        
+	        node = node->GetPrevious();
+	    }	    
+	    
+	    iter = gs_hiddenParents.erase(iter);
+	    if (!::DestroyWindow(hiddenHwnd))
+	    	wxLogLastError(_T("DestroyWindow(cleaning up hidden TLW parent)"));
+	    continue;
+	    
+	    next:
+	    iter++;
+    }
+}
+
 /* static */
 HWND wxTLWHiddenParentModule::GetHWND()
 {
@@ -1327,7 +1353,10 @@ HWND wxTLWHiddenParentModule::GetHWND()
             ms_className = HIDDEN_PARENT_CLASS;
         }
     }
-
+    
+    // remove old unused hidden windows
+    removeOldHiddenParents();
+    
     HWND hwnd = ::CreateWindow(ms_className, wxEmptyString, 0, 0, 0, 0, 0, NULL,
                                (HMENU)NULL, wxGetInstance(), NULL);
 
@@ -1335,6 +1364,6 @@ HWND wxTLWHiddenParentModule::GetHWND()
         wxLogLastError(_T("CreateWindow(hidden TLW parent)"));
     else
         gs_hiddenParents.push_back(hwnd);
-
+    
     return hwnd;
 }
