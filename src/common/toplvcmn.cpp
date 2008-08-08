@@ -78,8 +78,11 @@ bool wxTopLevelWindowBase::Destroy()
 {
     // delayed destruction: the frame will be deleted during the next idle
     // loop iteration
-    if ( !wxPendingDelete.Member(this) )
-        wxPendingDelete.Append(this);
+	{
+		wxCriticalSectionLocker locker(wxPendingDeleteCS);
+		if ( !wxPendingDelete.Member(this) )
+		    wxPendingDelete.Append(this);
+	}
 
 #ifdef __WXMAC__
     // on mac we know that objects will always be deleted after this event
@@ -135,10 +138,12 @@ bool wxTopLevelWindowBase::IsLastBeforeExit() const
     }
 
     // if yes, close all the other windows: this could still fail
+    wxCriticalSectionLocker locker(wxPendingDeleteCS);
     for ( i = wxTopLevelWindows.begin(); i != end; ++i )
     {
         // don't close twice the windows which are already marked for deletion
         wxTopLevelWindow * const win = wx_static_cast(wxTopLevelWindow *, *i);
+        
         if ( !wxPendingDelete.Member(win) && !win->Close() )
         {
             // one of the windows refused to close, don't exit

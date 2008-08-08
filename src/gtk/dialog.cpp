@@ -122,13 +122,16 @@ int wxDialog::ShowModal()
         if ( parent &&
                 parent != this &&
                     parent->IsShownOnScreen() &&
-                        !parent->IsBeingDeleted() &&
-                            !wxPendingDelete.Member(parent) &&
-                                !(parent->GetExtraStyle() & wxWS_EX_TRANSIENT) )
+                        !parent->IsBeingDeleted())
         {
-            m_parent = parent;
-            gtk_window_set_transient_for( GTK_WINDOW(m_widget),
-                                          GTK_WINDOW(parent->m_widget) );
+    		wxCriticalSectionLocker locker(wxPendingDeleteCS);
+    		if (!wxPendingDelete.Member(parent) &&
+    				!(parent->GetExtraStyle() & wxWS_EX_TRANSIENT) )
+	        {
+	            m_parent = parent;
+	            gtk_window_set_transient_for( GTK_WINDOW(m_widget),
+	                                          GTK_WINDOW(parent->m_widget) );
+	        }
         }
     }
 

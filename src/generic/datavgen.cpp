@@ -915,6 +915,7 @@ void wxDataViewTextCtrlWrapper::Finish()
         m_owner->FinishEditing(m_text);
 
         // delete later
+        wxCriticalSectionLocker locker(wxPendingDeleteCS);
         wxPendingDelete.Append( this );
     }
 }

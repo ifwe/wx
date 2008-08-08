@@ -2154,6 +2154,7 @@ void wxListTextCtrlWrapper::Finish()
         m_text->RemoveEventHandler(this);
         m_owner->FinishEditing(m_text);
 
+        wxCriticalSectionLocker locker(wxPendingDeleteCS);
         wxPendingDelete.Append( this );
     }
 }

@@ -199,8 +199,8 @@ void wxHyperlinkCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     dc.DrawText(GetLabel(), GetLabelRect().GetTopLeft());
     
-    if (wxWindow::FindFocus() == this)
-    	wxRendererNative::Get().DrawFocusRect(this, dc, GetLabelRect());    	
+    //if (HasFlag(wxHL_SHOW_FOCUS) && wxWindow::FindFocus() == this)
+    //	wxRendererNative::Get().DrawFocusRect(this, dc, GetLabelRect());    	
 }
 
 void wxHyperlinkCtrl::OnLeftDown(wxMouseEvent& event)

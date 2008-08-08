@@ -712,7 +712,9 @@ void wxMenuBase::UpdateUI(wxEvtHandler* source)
     {
         // Don't update menus if the parent
         // frame is about to get deleted
-        wxWindow *tlw = wxGetTopLevelParent( GetInvokingWindow() );
+        wxWindow *tlw = wxGetTopLevelParent( GetInvokingWindow() );       
+        
+        wxCriticalSectionLocker locker(wxPendingDeleteCS);
         if (tlw && wxPendingDelete.Member(tlw))
             return;
     }

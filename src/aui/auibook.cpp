@@ -3280,6 +3280,7 @@ bool wxAuiNotebook::DeletePage(size_t page_idx)
     {
         // delete the child frame with pending delete, as is
         // customary with frame windows
+    	wxCriticalSectionLocker locker(wxPendingDeleteCS);
         if (!wxPendingDelete.Member(wnd))
             wxPendingDelete.Append(wnd);
     }
@@ -4219,8 +4220,11 @@ void wxAuiNotebook::RemoveEmptyTabFrames()
 
             // use pending delete because sometimes during
             // window closing, refreshs are pending
-            if (!wxPendingDelete.Member(tab_frame->m_tabs))
-                wxPendingDelete.Append(tab_frame->m_tabs);
+            {
+            	wxCriticalSectionLocker locker(wxPendingDeleteCS);
+	            if (!wxPendingDelete.Member(tab_frame->m_tabs))
+	                wxPendingDelete.Append(tab_frame->m_tabs);
+            }
 
             tab_frame->m_tabs = NULL;
 

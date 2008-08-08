@@ -65,6 +65,7 @@
 WX_CHECK_BUILD_OPTIONS("wxCore")
 
 WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
+WXDLLIMPEXP_DATA_CORE(wxCriticalSection) wxPendingDeleteCS;
 
 // ----------------------------------------------------------------------------
 // wxEventLoopPtr
@@ -409,6 +410,7 @@ void wxAppBase::SetActive(bool active, wxWindow * WXUNUSED(lastFocus))
 
 void wxAppBase::DeletePendingObjects()
 {
+	wxCriticalSectionLocker locker(wxPendingDeleteCS);
     wxList::compatibility_iterator node = wxPendingDelete.GetFirst();
     while (node)
     {
@@ -649,12 +651,14 @@ bool wxGUIAppTraitsBase::HasStderr()
 
 void wxGUIAppTraitsBase::ScheduleForDestroy(wxObject *object)
 {
+	wxCriticalSectionLocker locker(wxPendingDeleteCS);
     if ( !wxPendingDelete.Member(object) )
         wxPendingDelete.Append(object);
 }
 
 void wxGUIAppTraitsBase::RemoveFromPendingDelete(wxObject *object)
 {
+	wxCriticalSectionLocker locker(wxPendingDeleteCS);
     wxPendingDelete.DeleteObject(object);
 }
 

@@ -441,7 +441,10 @@ void wxTreeTextCtrl::Finish()
     {
         m_owner->ResetTextControl();
 
-        wxPendingDelete.Append(this);
+        {
+        	wxCriticalSectionLocker locker(wxPendingDeleteCS);
+        	wxPendingDelete.Append(this);
+        }
 
         m_finished = true;
 

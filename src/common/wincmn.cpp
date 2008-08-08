@@ -310,7 +310,10 @@ wxWindowBase::~wxWindowBase()
 
     // Just in case the window has been Closed, but we're then deleting
     // immediately: don't leave dangling pointers.
-    wxPendingDelete.DeleteObject(this);
+    {
+    	wxCriticalSectionLocker locker(wxPendingDeleteCS);
+    	wxPendingDelete.DeleteObject(this);
+    }
 
     // Just in case we've loaded a top-level window via LoadNativeDialog but
     // we weren't a dialog class
