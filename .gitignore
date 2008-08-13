@@ -1,8 +1,7 @@
 *.swp
 build/msw/vc_*/
 lib/vc_dll/
-contrib/build/stc/vc_mswudll/
-contrib/build/stc/vc_mswuhdll/
+contrib/build/stc/vc_msw*dll/
 include/wx/msw/setup.h
 build/msw/config.vc
 *.vc
