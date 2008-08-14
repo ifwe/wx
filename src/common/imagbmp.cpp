@@ -462,8 +462,6 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
     wxUint8         aByte;
     wxUint16        aWord;
 
-    unsigned char* alpha = 0;
-
     // allocate space for palette if needed:
     _cmap *cmap;
 
@@ -486,20 +484,31 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
 
     unsigned char *ptr = image->GetData();
 
-    if (bpp == 32)
-    {
-        // tell the image to allocate an alpha buffer
-        image->SetAlpha(NULL);
-        alpha = image->GetAlpha();
-    }
-
     if ( !ptr )
     {
         if ( verbose )
             wxLogError( _("BMP: Couldn't allocate memory.") );
-        if ( cmap )
-            delete[] cmap;
+        delete[] cmap;
         return false;
+    }
+
+    unsigned char *alpha;
+    if ( bpp == 32 )
+    {
+        // tell the image to allocate an alpha buffer
+        image->SetAlpha();
+        alpha = image->GetAlpha();
+        if ( !alpha )
+        {
+            if ( verbose )
+                wxLogError(_("BMP: Couldn't allocate memory."));
+            delete[] cmap;
+            return false;
+        }
+    }
+    else // no alpha
+    {
+        alpha = NULL;
     }
 
     // Reading the palette, if it exists:
@@ -828,8 +837,11 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
                 ptr[poffset + 1] = temp;
                 temp = (unsigned char)((aDword & bmask) >> bshift);
                 ptr[poffset + 2] = temp;
-                temp = (unsigned char)((aDword & amask) >> ashift);
-                alpha[line * width + column] = temp;
+                if ( alpha )
+                {
+                    temp = (unsigned char)((aDword & amask) >> ashift);
+                    alpha[line * width + column] = temp;
+                }
                 column++;
             }
         }
