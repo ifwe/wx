@@ -190,6 +190,9 @@ wxVideoMode wxAppBase::GetDisplayMode() const
 
 wxLayoutDirection wxAppBase::GetLayoutDirection() const
 {
+    return wxLayout_Default;
+
+
 #if wxUSE_INTL
     const wxLocale *const locale = wxGetLocale();
     if ( locale )
