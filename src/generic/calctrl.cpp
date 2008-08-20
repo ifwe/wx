@@ -37,6 +37,7 @@
 #if wxUSE_CALENDARCTRL
 
 #include "wx/spinctrl.h"
+#include "wx/dcbuffer.h"
 
 // if wxDatePickerCtrl code doesn't define the date event, do it here as we
 // need it as well
@@ -240,7 +241,7 @@ bool wxCalendarCtrl::Create(wxWindow *parent,
 
     // Since we don't paint the whole background make sure that the platform
     // will use the right one.
-    SetBackgroundColour(m_colBackground);
+    SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 
     SetHolidayAttrs();
 
@@ -917,7 +918,12 @@ void wxCalendarCtrl::RecalcGeometry()
 
 void wxCalendarCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
-    wxPaintDC dc(this);
+    wxAutoBufferedPaintDC dc(this);
+
+    // paint the background manually since we have wxBG_STYLE_CUSTOM
+    dc.SetBrush(m_colBackground);
+    dc.SetPen(*wxTRANSPARENT_PEN);
+    dc.DrawRectangle(GetClientRect());
 
     dc.SetFont(GetFont());
 
@@ -1244,7 +1250,7 @@ void wxCalendarCtrl::RefreshDate(const wxDateTime& date)
     Refresh(true, &rect);
 }
 
-void wxCalendarCtrl::HighlightRange(wxPaintDC* pDC, const wxDateTime& fromdate, const wxDateTime& todate, const wxPen* pPen, const wxBrush* pBrush)
+void wxCalendarCtrl::HighlightRange(wxDC* pDC, const wxDateTime& fromdate, const wxDateTime& todate, const wxPen* pPen, const wxBrush* pBrush)
 {
     // Highlights the given range using pen and brush
     // Does nothing if todate < fromdate
