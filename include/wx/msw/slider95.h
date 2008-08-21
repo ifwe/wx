@@ -119,6 +119,7 @@ protected:
 
     // the labels windows, if any
     wxSubwindows *m_labels;
+    wxWindowIDRef *m_labelIds;
 
     int           m_rangeMin;
     int           m_rangeMax;

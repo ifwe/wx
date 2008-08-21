@@ -1635,6 +1635,24 @@ enum wxBackgroundStyle
 /*  Standard menu IDs */
 enum
 {
+    /*
+       These ids delimit the range used by automatically-generated ids
+       (i.e. those used when wxID_ANY is specified during construction).
+     */
+#if defined(__WXMSW__) || wxUSE_AUTOID_MANAGEMENT
+    /*
+       On MSW the range is always restricted no matter if id management
+       is used or not because the native window ids are limited to short
+       range.  On other platforms the range is only restricted if id
+       management is used so the reference count buffer won't be so big.
+     */
+    wxID_AUTO_LOWEST = -32000,
+    wxID_AUTO_HIGHEST = -2000,
+#else
+    wxID_AUTO_LOWEST = -1000000,
+    wxID_AUTO_HIGHEST = -2000,
+#endif
+    
     /* no id matches this one when compared to it */
     wxID_NONE = -3,
 
@@ -1765,6 +1783,19 @@ enum
 
     wxID_HIGHEST = 5999
 };
+
+/*  ---------------------------------------------------------------------------- */
+/*  wxWindowID type (after wxID_XYZ enum, platform detection, and dlimpexp.h)    */
+/*  ---------------------------------------------------------------------------- */
+
+/*  special care should be taken with this type under Windows where the real */
+/*  window id is unsigned, so we must always do the cast before comparing them */
+/*  (or else they would be always different!). Using wxGetWindowId() which does */
+/*  the cast itself is recommended. Note that this type can't be unsigned */
+/*  because wxID_ANY == -1 is a valid (and largely used) value for window id. */
+#if defined(__cplusplus) && wxUSE_GUI
+    #include "wx/windowid.h"
+#endif
 
 /*  ---------------------------------------------------------------------------- */
 /*  other constants */

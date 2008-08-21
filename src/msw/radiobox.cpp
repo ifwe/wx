@@ -129,6 +129,7 @@ void wxRadioBox::Init()
 {
     m_selectedButton = wxNOT_FOUND;
     m_radioButtons = NULL;
+    m_radioButtonIds = NULL;
     m_radioWidth = NULL;
     m_radioHeight = NULL;
 }
@@ -156,6 +157,7 @@ bool wxRadioBox::Create(wxWindow *parent,
 #endif // wxUSE_VALIDATORS/!wxUSE_VALIDATORS
 
     m_radioButtons = new wxSubwindows(n);
+    m_radioButtonIds = new wxWindowIDRef[n + 1];
     m_radioWidth = new int[n];
     m_radioHeight = new int[n];
 
@@ -169,12 +171,14 @@ bool wxRadioBox::Create(wxWindow *parent,
 
         long newId = NewControlId();
 
+        m_radioButtonIds[i] = NewControlId();
+
         HWND hwndBtn = ::CreateWindow(_T("BUTTON"),
                                       choices[i],
                                       styleBtn,
                                       0, 0, 0, 0,   // will be set in SetSize()
                                       GetHwndOf(parent),
-                                      (HMENU)newId,
+                                      (HMENU)(wxWindowID)m_radioButtonIds[i],
                                       wxGetInstance(),
                                       NULL);
 
@@ -189,15 +193,17 @@ bool wxRadioBox::Create(wxWindow *parent,
 
         SubclassRadioButton((WXHWND)hwndBtn);
 
-        m_subControls.Add(newId);
+        m_subControls.Add(m_radioButtonIds[i]);
     }
 
     // Create a dummy radio control to end the group.
+    m_radioButtonIds[n] = NewControlId();
+    
     (void)::CreateWindow(_T("BUTTON"),
                          wxEmptyString,
                          WS_GROUP | BS_AUTORADIOBUTTON | WS_CHILD,
                          0, 0, 0, 0, GetHwndOf(parent),
-                         (HMENU)NewControlId(), wxGetInstance(), NULL);
+                         (HMENU)(wxWindowID)m_radioButtonIds[n], wxGetInstance(), NULL);
 
     m_radioButtons->SetFont(GetFont());
 
@@ -237,6 +243,7 @@ wxRadioBox::~wxRadioBox()
     m_isBeingDeleted = true;
 
     delete m_radioButtons;
+    delete[] m_radioButtonIds;
     delete[] m_radioWidth;
     delete[] m_radioHeight;
 }

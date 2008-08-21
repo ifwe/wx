@@ -105,7 +105,7 @@ bool wxStatusBar95::Create(wxWindow *parent,
     m_hWnd = (WXHWND)CreateStatusWindow(wstyle,
                                         wxEmptyString,
                                         GetHwndOf(parent),
-                                        m_windowId);
+                                        m_windowId.GetValue());
     if ( m_hWnd == 0 )
     {
         wxLogSysError(_("Failed to create a status bar."));

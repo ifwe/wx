@@ -1549,7 +1549,10 @@ void wxXmlResourceHandler::CreateChildrenPrivately(wxObject *parent, wxXmlNode *
 
 struct XRCID_record
 {
-    int id;
+    /* Hold the id so that once an id is allocated for a name, it
+       does not get created again by NewControlId at least
+       until we are done with it */
+    wxWindowIDRef id;
     wxChar *key;
     XRCID_record *next;
 };
