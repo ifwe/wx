@@ -207,6 +207,9 @@ public:
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
     virtual wxVisualAttributes GetDefaultAttributes() const;
 
+    // MSW only
+    void ShowScrollbar(int orientation, bool show);
+
 protected:
     // common part of all ctors
     void Init();

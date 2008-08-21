@@ -433,6 +433,8 @@ public:
 
     virtual bool ShouldInheritColours() const { return false; }
 
+    void ShowScrollbar(int, bool) {}
+
 protected:
     // override streambuf method
 #if wxHAS_TEXT_WINDOW_STREAM

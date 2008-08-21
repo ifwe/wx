@@ -1412,6 +1412,14 @@ void wxTextCtrl::SetSelection(long from, long to)
     DoSetSelection(from, to);
 }
 
+void wxTextCtrl::ShowScrollbar(int orientation, bool show)
+{
+    WPARAM wParam = orientation == wxVERTICAL ? SB_VERT : SB_HORZ;
+    LPARAM lParam = (LPARAM)(show ? TRUE : FALSE);
+
+    ::SendMessage(GetHwnd(), EM_SHOWSCROLLBAR, wParam, lParam);
+}
+
 void wxTextCtrl::DoSetSelection(long from, long to, bool scrollCaret)
 {
     HWND hWnd = GetHwnd();
