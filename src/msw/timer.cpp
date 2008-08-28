@@ -125,9 +125,9 @@ void wxTimer::Stop()
 {
     if ( m_id )
     {
-        ::KillTimer(NULL, m_id);
-
         TimerMap().erase(m_id);
+        if (!::KillTimer(NULL, m_id))
+            wxLogApiError(_T("KillTimer"), ::GetLastError());
     }
 
     m_id = 0;
