@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if !defined(__MWERKS__) && !defined(__SALFORDC__)
+#if !defined(__MWERKS__)
     #include <memory.h>
 #endif
 
@@ -286,7 +286,7 @@ bool wxDIB::Load(const wxString& filename)
     m_handle = (HBITMAP)::LoadImage
                          (
                             wxGetInstance(),
-                            filename,
+                            filename.fn_str(),
                             IMAGE_BITMAP,
                             0, 0, // don't specify the size
                             LR_CREATEDIBSECTION | LR_LOADFROMFILE
@@ -307,6 +307,7 @@ bool wxDIB::Save(const wxString& filename)
 {
     wxCHECK_MSG( m_handle, false, _T("wxDIB::Save(): invalid object") );
 
+#if wxUSE_FILE
     wxFile file(filename, wxFile::write);
     bool ok = file.IsOpened();
     if ( ok )
@@ -335,6 +336,9 @@ bool wxDIB::Save(const wxString& filename)
                         file.Write(ds.dsBm.bmBits, sizeImage) == sizeImage;
         }
     }
+#else // !wxUSE_FILE
+    bool ok = false;
+#endif // wxUSE_FILE/!wxUSE_FILE
 
     if ( !ok )
     {
@@ -692,6 +696,7 @@ bool wxDIB::Create(const wxImage& image)
     const unsigned char *src = image.GetData() + ((h - 1) * srcBytesPerLine);
     const unsigned char *alpha = m_hasAlpha ? image.GetAlpha() + (h - 1)*w
                                             : NULL;
+
     unsigned char *dstLineStart = (unsigned char *)m_data;
     for ( int y = 0; y < h; y++ )
     {
@@ -793,7 +798,6 @@ wxImage wxDIB::ConvertToImage() const
 
                 src++;
             }
-
             dst += 3;
         }
 
