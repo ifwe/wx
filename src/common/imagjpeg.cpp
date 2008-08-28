@@ -236,6 +236,7 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
 
     image->Destroy();
     cinfo.err = jpeg_std_error( &jerr.pub );
+    cinfo.client_data = 0;
     jerr.pub.error_exit = wx_error_exit;
 
     if (!verbose)
