@@ -1872,7 +1872,7 @@ void wxWindowMSW::DoScreenToClient(int *x, int *y) const
 
 void wxWindowMSW::DoClientToScreen(int *x, int *y) const
 {
-    POINT pt;
+    POINT pt = {0, 0};
     if ( x )
         pt.x = *x;
     if ( y )
