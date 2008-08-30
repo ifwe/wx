@@ -594,6 +594,10 @@ WXDWORD wxTextCtrl::MSWGetStyle(long style, WXDWORD *exstyle) const
             }
 #endif // wxUSE_RICHEDIT
         }
+        else
+        {
+            msStyle |= ES_AUTOVSCROLL;
+        }
 
         style |= wxTE_PROCESS_ENTER;
     }
