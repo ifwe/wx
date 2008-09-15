@@ -85,7 +85,7 @@
 // private functions prototypes
 // ----------------------------------------------------------------------------
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
     // really just show the assert dialog
     static bool DoShowAssertDialog(const wxString& msg);
 
@@ -101,7 +101,7 @@
 
     // turn on the trace masks specified in the env variable WXTRACE
     static void LINKAGEMODE SetTraceMasks();
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
 // ----------------------------------------------------------------------------
 // global vars
@@ -434,7 +434,7 @@ bool wxAppConsole::CheckBuildOptions(const char *optionsSignature,
     return true;
 }
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
 
 void wxAppConsole::OnAssertFailure(const wxChar *file,
                                    int line,
@@ -453,7 +453,7 @@ void wxAppConsole::OnAssert(const wxChar *file,
     OnAssertFailure(file, line, NULL, cond, msg);
 }
 
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
 #if WXWIN_COMPATIBILITY_2_4
 
@@ -501,7 +501,7 @@ wxRendererNative *wxConsoleAppTraitsBase::CreateRenderer()
     return NULL;
 }
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
 bool wxConsoleAppTraitsBase::ShowAssertDialog(const wxString& msg)
 {
     return wxAppTraitsBase::ShowAssertDialog(msg);
@@ -535,7 +535,7 @@ GSocketGUIFunctionsTable* wxConsoleAppTraitsBase::GetSocketGUIFunctionsTable()
 // wxAppTraits
 // ----------------------------------------------------------------------------
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
 
 bool wxAppTraitsBase::ShowAssertDialog(const wxString& msgOriginal)
 {
@@ -649,7 +649,7 @@ void wxWakeUpIdle()
     //else: do nothing, what can we do?
 }
 
-#ifdef  __WXDEBUG__
+#ifdef  __WXASSERTIONS__
 
 // wxASSERT() helper
 bool wxAssertIsEqual(int x, int y)
@@ -712,13 +712,13 @@ void wxOnAssert(const wxChar *szFile,
     }
 }
 
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
 // ============================================================================
 // private functions implementation
 // ============================================================================
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
 
 static void LINKAGEMODE SetTraceMasks()
 {
@@ -843,4 +843,4 @@ void ShowAssertDialog(const wxChar *szFile,
     }
 }
 
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__

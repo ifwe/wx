@@ -72,7 +72,7 @@ public:
     // functions abstracting differences between GUI and console modes
     // ------------------------------------------------------------------------
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
     // show the assert dialog with the specified message in GUI or just print
     // the string to stderr in console mode
     //
@@ -81,7 +81,7 @@ public:
     //
     // return true to suppress subsequent asserts, false to continue as before
     virtual bool ShowAssertDialog(const wxString& msg) = 0;
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
     // return true if fprintf(stderr) goes somewhere, false otherwise
     virtual bool HasStderr() = 0;

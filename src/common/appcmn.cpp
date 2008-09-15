@@ -570,7 +570,7 @@ wxRendererNative *wxGUIAppTraitsBase::CreateRenderer()
     return NULL;
 }
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
 
 bool wxGUIAppTraitsBase::ShowAssertDialog(const wxString& msg)
 {
@@ -639,7 +639,7 @@ bool wxGUIAppTraitsBase::ShowAssertDialog(const wxString& msg)
 #endif // !wxUSE_MSGDLG/wxUSE_MSGDLG
 }
 
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
 bool wxGUIAppTraitsBase::HasStderr()
 {

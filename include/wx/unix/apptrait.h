@@ -44,7 +44,7 @@ public:
     virtual wxString GetDesktopEnvironment() const;
 #endif
 
-#if defined(__WXDEBUG__) && defined(__WXGTK20__)
+#if defined(__WXASSERTIONS__) && defined(__WXGTK20__)
     virtual bool ShowAssertDialog(const wxString& msg);
 #endif
 };

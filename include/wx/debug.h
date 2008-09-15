@@ -88,7 +88,7 @@
 /*  Macros which are completely disabled in 'release' mode */
 /*  */
 /*  NB: these functions are implemented in src/common/appcmn.cpp */
-#if defined(__cplusplus) && defined(__WXDEBUG__)
+#if defined(__cplusplus) && defined(__WXASSERTIONS__)
   /*
     This function is called whenever one of debugging macros fails (i.e.
     condition is false in an assertion). To customize its behaviour, override
