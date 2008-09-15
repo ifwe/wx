@@ -157,9 +157,9 @@ void wxTopLevelWindowMSW::Init()
     info->cbSize = sizeof(SHACTIVATEINFO);
 
     m_activateInfo = (void*) info;
+#endif
     
     m_hiddenParent = 0;
-#endif
 }
 
 WXDWORD wxTopLevelWindowMSW::MSWGetStyle(long style, WXDWORD *exflags) const
