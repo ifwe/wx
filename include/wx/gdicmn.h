@@ -659,8 +659,8 @@ public:
     virtual const wxFont* GetFont(Item item);
     static const wxPen* GetPen(Item item);
 
-protected:
     static wxStockGDI* ms_instance;
+protected:
 
     static wxObject* ms_stockObject[ITEMCOUNT];
 
