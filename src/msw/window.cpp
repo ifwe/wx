@@ -3411,10 +3411,12 @@ WXLRESULT wxWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM l
 
     if ( !processed )
     {
+#if 0
 #ifdef __WXDEBUG__
         wxLogTrace(wxTraceMessages, wxT("Forwarding %s to DefWindowProc."),
                    wxGetMessageName(message));
 #endif // __WXDEBUG__
+#endif
         rc.result = MSWDefWindowProc(message, wParam, lParam);
     }
 
