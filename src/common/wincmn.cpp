@@ -2563,9 +2563,19 @@ void wxWindowBase::ReleaseMouse()
 
 static void DoNotifyWindowAboutCaptureLost(wxWindow *win)
 {
-    wxMouseCaptureLostEvent event(win->GetId());
+	// crashes here where win or win->GetEventHandler() is NULL (b19523)
+	if (!win)
+	{
+		wxFAIL_MSG(wxT("win was NULL"));
+		return;
+	}
+
+	wxMouseCaptureLostEvent event(win->GetId());
     event.SetEventObject(win);
-    if ( !win->GetEventHandler()->ProcessEvent(event) )
+
+	if (!win->GetEventHandler())
+		wxFAIL_MSG(wxT("win->GetEventHandler() was NULL"));
+	else if ( !win->GetEventHandler()->ProcessEvent(event) )
     {
         // windows must handle this event, otherwise the app wouldn't behave
         // correctly if it loses capture unexpectedly; see the discussion here:

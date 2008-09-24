@@ -4,6 +4,11 @@ lib/vc_dll/
 contrib/build/stc/vc_msw*dll/
 include/wx/msw/setup.h
 build/msw/config.vc
+build/msw/wx_*.vcproj.*.user
+build/msw/wx_*.vcproj
+build/msw/*.ncb
+build/msw/*.sln
+build/msw/*.suo
 *.vc
 *.bcc
 *.gcc

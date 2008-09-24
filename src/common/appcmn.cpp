@@ -192,6 +192,7 @@ wxLayoutDirection wxAppBase::GetLayoutDirection() const
 {
     return wxLayout_Default;
 
+#if 0 // disabled until Digsby can mirror all graphics correctly
 
 #if wxUSE_INTL
     const wxLocale *const locale = wxGetLocale();
@@ -207,6 +208,8 @@ wxLayoutDirection wxAppBase::GetLayoutDirection() const
 
     // we don't know
     return wxLayout_Default;
+
+#endif // 0
 }
 
 #if wxUSE_CMDLINE_PARSER

@@ -2585,11 +2585,14 @@ wxWindowCreationHook::~wxWindowCreationHook()
 LRESULT WXDLLEXPORT APIENTRY _EXPORT wxWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     // trace all messages - useful for the debugging
+
+#if 0
 #ifdef __WXDEBUG__
     wxLogTrace(wxTraceMessages,
                wxT("Processing %s(hWnd=%08lx, wParam=%8lx, lParam=%8lx)"),
                wxGetMessageName(message), (long)hWnd, (long)wParam, lParam);
 #endif // __WXDEBUG__
+#endif
 
     wxWindowMSW *wnd = wxFindWinFromHandle((WXHWND) hWnd);
 
@@ -3408,10 +3411,12 @@ WXLRESULT wxWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM l
 
     if ( !processed )
     {
+#if 0
 #ifdef __WXDEBUG__
         wxLogTrace(wxTraceMessages, wxT("Forwarding %s to DefWindowProc."),
                    wxGetMessageName(message));
 #endif // __WXDEBUG__
+#endif
         rc.result = MSWDefWindowProc(message, wParam, lParam);
     }
 

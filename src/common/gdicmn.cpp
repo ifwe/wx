@@ -483,9 +483,26 @@ wxColour *wxColourDatabase::FindColour(const wxString& name)
 // stock objects
 // ============================================================================
 
-static wxStockGDI gs_wxStockGDI_instance;
-wxStockGDI* wxStockGDI::ms_instance = &gs_wxStockGDI_instance;
 wxObject* wxStockGDI::ms_stockObject[ITEMCOUNT];
+wxStockGDI* wxStockGDI::ms_instance = 0;
+
+class wxStockGDIModule: public wxModule
+{
+public:
+    bool OnInit()
+    {
+        wxStockGDI::ms_instance = new wxStockGDI();
+        return true;
+    }
+    void OnExit()
+    {
+        delete wxStockGDI::ms_instance;
+    }
+
+    DECLARE_DYNAMIC_CLASS(wxStockGDIModule)
+};
+
+IMPLEMENT_DYNAMIC_CLASS(wxStockGDIModule, wxModule)
 
 wxStockGDI::wxStockGDI()
 {
