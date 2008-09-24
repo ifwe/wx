@@ -491,7 +491,6 @@ class wxStockGDIModule: public wxModule
 public:
     bool OnInit()
     {
-        fprintf(stderr, "wxStockGDIModule initialization\n");
         wxStockGDI::ms_instance = new wxStockGDI();
         return true;
     }
