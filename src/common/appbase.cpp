@@ -63,7 +63,7 @@
     #endif
 #endif // __WXMAC__
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
     #if wxUSE_STACKWALKER
         #include "wx/stackwalk.h"
         #ifdef __WXMSW__
@@ -72,7 +72,7 @@
     #endif // wxUSE_STACKWALKER
 
     #include "wx/recguard.h"
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
 // wxABI_VERSION can be defined when compiling applications but it should be
 // left undefined when compiling the library itself, it is then set to its

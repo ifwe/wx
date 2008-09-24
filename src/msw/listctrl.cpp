@@ -376,8 +376,10 @@ WXDWORD wxListCtrl::MSWGetStyle(long style, WXDWORD *exstyle) const
     MAP_MODE_STYLE(wxLC_LIST, LVS_LIST)
     MAP_MODE_STYLE(wxLC_REPORT, LVS_REPORT)
 
+#ifdef __WXDEBUG__
     wxASSERT_MSG( nModes == 1,
                   _T("wxListCtrl style should have exactly one mode bit set") );
+#endif
 
 #undef MAP_MODE_STYLE
 
@@ -2845,7 +2847,7 @@ int wxListCtrl::OnGetItemColumnImage(long item, long column) const
     return -1;
 }
 
-wxListItemAttr *wxListCtrl::OnGetItemAttr(long WXUNUSED_UNLESS_DEBUG(item)) const
+wxListItemAttr *wxListCtrl::OnGetItemAttr(long WXUNUSED_UNLESS_ASSERTIONS(item)) const
 {
     wxASSERT_MSG( item >= 0 && item < GetItemCount(),
                   _T("invalid item index in OnGetItemAttr()") );

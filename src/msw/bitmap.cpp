@@ -222,8 +222,10 @@ wxBitmapRefData::wxBitmapRefData(const wxBitmapRefData& data)
 
 void wxBitmapRefData::Free()
 {
+#ifdef __WXDEBUG__
     wxASSERT_MSG( !m_selectedInto,
                   wxT("deleting bitmap still selected into wxMemoryDC") );
+#endif
 
 #if wxUSE_WXDIB
     wxASSERT_MSG( !m_dib, _T("forgot to call wxBitmap::UngetRawData()!") );
@@ -1505,8 +1507,10 @@ bool wxMask::Create(const wxBitmap& bitmap, const wxColour& colour)
     bool ok = true;
 
     // SelectObject() will fail
+#ifdef __WXDEBUG__
     wxASSERT_MSG( !bitmap.GetSelectedInto(),
                   _T("bitmap can't be selected in another DC") );
+#endif
 
     HGDIOBJ hbmpSrcOld = ::SelectObject(srcDC, GetHbitmapOf(bitmap));
     if ( !hbmpSrcOld )

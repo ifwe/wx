@@ -565,6 +565,13 @@ typedef int wxWindowID;
     #define WXUNUSED_UNLESS_DEBUG(param)  WXUNUSED(param)
 #endif
 
+/* some arguments are only used in wxASSERT statements */
+#ifdef __WXASSERTIONS__
+    #define WXUNUSED_UNLESS_ASSERTIONS(param) param
+#else
+    #define WXUNUSED_UNLESS_ASSERTIONS(param)  WXUNUSED(param)
+#endif
+
 /*  some arguments are not used in unicode mode */
 #if wxUSE_UNICODE
     #define WXUNUSED_IN_UNICODE(param)  WXUNUSED(param)

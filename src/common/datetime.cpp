@@ -338,13 +338,13 @@ static const long MILLISECONDS_PER_DAY = 86400000l;
 static const long EPOCH_JDN = 2440587l;
 
 // used only in asserts
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
 // the date of JDN -0.5 (as we don't work with fractional parts, this is the
 // reference date for us) is Nov 24, 4714BC
 static const int JDN_0_YEAR = -4713;
 static const int JDN_0_MONTH = wxDateTime::Nov;
 static const int JDN_0_DAY = 24;
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
 
 // the constants used for JDN calculations
 static const long JDN_OFFSET         = 32046l;

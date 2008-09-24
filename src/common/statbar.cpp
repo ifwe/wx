@@ -176,7 +176,7 @@ void wxStatusBarBase::SetFieldsCount(int number, const int *widths)
         Refresh();
 }
 
-void wxStatusBarBase::SetStatusWidths(int WXUNUSED_UNLESS_DEBUG(n),
+void wxStatusBarBase::SetStatusWidths(int WXUNUSED_UNLESS_ASSERTIONS(n),
                                       const int widths[])
 {
     wxCHECK_RET( widths, _T("NULL pointer in SetStatusWidths") );
@@ -195,7 +195,7 @@ void wxStatusBarBase::SetStatusWidths(int WXUNUSED_UNLESS_DEBUG(n),
     Refresh();
 }
 
-void wxStatusBarBase::SetStatusStyles(int WXUNUSED_UNLESS_DEBUG(n),
+void wxStatusBarBase::SetStatusStyles(int WXUNUSED_UNLESS_ASSERTIONS(n),
                                       const int styles[])
 {
     wxCHECK_RET( styles, _T("NULL pointer in SetStatusStyles") );

@@ -124,7 +124,7 @@ public:
     virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 
 protected:
-#if wxUSE_STACKWALKER && defined( __WXDEBUG__ )
+#if wxUSE_STACKWALKER && defined( __WXASSERTIONS__ )
     // utility function: returns the stack frame as a plain wxString
     virtual wxString GetAssertStackTrace();
 #endif
@@ -177,9 +177,9 @@ public:
     virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable();
 #endif
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
     virtual bool ShowAssertDialog(const wxString& msg);
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
     virtual bool HasStderr();
 
     virtual void ScheduleForDestroy(wxObject *object);
@@ -220,9 +220,9 @@ public:
     virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable();
 #endif
 
-#ifdef __WXDEBUG__
+#ifdef __WXASSERTIONS__
     virtual bool ShowAssertDialog(const wxString& msg);
-#endif // __WXDEBUG__
+#endif // __WXASSERTIONS__
     virtual bool HasStderr();
 
     virtual void ScheduleForDestroy(wxObject *object);
