@@ -6102,6 +6102,7 @@ extern wxWindow *wxGetWindowFromHWND(WXHWND hWnd)
 #endif
 
         hwnd = ::GetParent(hwnd);
+        wxASSERT(hwnd);
         win = wxFindWinFromHandle((WXHWND)hwnd);
     }
 
@@ -6640,7 +6641,14 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 
     HWND hWnd = ::WindowFromPoint(pt2);
 
-    return wxGetWindowFromHWND((WXHWND)hWnd);
+    wxWindow* win = wxGetWindowFromHWND((WXHWND)hWnd);
+
+    // don't return a window that is about to be destroyed
+    wxCriticalSectionLocker locker(wxPendingDeleteCS);
+    if (win && wxPendingDelete.Member(reinterpret_cast<wxObject*>(win)))
+        win = NULL;
+
+    return win;
 }
 
 // Get the current mouse position.
