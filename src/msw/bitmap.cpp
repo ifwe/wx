@@ -272,16 +272,16 @@ wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *dataOrig) const
     {
         wxDIB dib((HBITMAP)(data->m_hBitmap));
         self->CopyFromDIB(dib);
-        
-        selfdata = wx_static_cast(wxBitmapRefData *, m_refData); 
+
+        selfdata = wx_static_cast(wxBitmapRefData *, m_refData);
         selfdata->m_hasAlpha = data->m_hasAlpha;
     }
     else
 #endif // wxUSE_WXDIB
     {
         // copy the bitmap data
-        selfdata = new wxBitmapRefData(*data); 
-        self->m_refData = selfdata; 
+        selfdata = new wxBitmapRefData(*data);
+        self->m_refData = selfdata;
     }
 
     // copy also the mask
@@ -678,16 +678,16 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth, const wxDC& dc)
             unsigned char green = image.GetGreen(i, j);
             unsigned char blue = image.GetBlue(i, j);
 
-            ::SetPixel(hMemDC, i, j, PALETTERGB(red, green, blue));
+            ::SetPixelV(hMemDC, i, j, PALETTERGB(red, green, blue));
 
             if (hasMask)
             {
                 // scan the bitmap for the transparent colour and set the corresponding
                 // pixels in the mask to BLACK and the rest to WHITE
                 if (maskR == red && maskG == green && maskB == blue)
-                    ::SetPixel(hMaskDC, i, j, PALETTERGB(0, 0, 0));
+                    ::SetPixelV(hMaskDC, i, j, PALETTERGB(0, 0, 0));
                 else
-                    ::SetPixel(hMaskDC, i, j, PALETTERGB(255, 255, 255));
+                    ::SetPixelV(hMaskDC, i, j, PALETTERGB(255, 255, 255));
             }
         }
     }
@@ -1104,7 +1104,7 @@ wxBitmap wxBitmap::GetSubBitmapOfHDC( const wxRect& rect, WXHDC hdc ) const
 
     {
         SelectInHDC selectDst(dcDst, GetHbitmapOf(ret));
-		
+
         if ( !selectDst )
         {
             wxLogLastError(_T("SelectObject(destBitmap)"));
@@ -1381,7 +1381,7 @@ wxMask::wxMask(const wxMask &mask)
     SelectObject(destDC, (HBITMAP) m_maskBitmap);
 
     BitBlt(destDC, 0, 0, w, h, srcDC, 0, 0, SRCCOPY);
-    
+
     SelectObject(srcDC, 0);
     DeleteDC(srcDC);
     SelectObject(destDC, 0);

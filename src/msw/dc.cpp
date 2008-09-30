@@ -2550,6 +2550,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxDCModule, wxModule)
 // alpha channel support
 // ----------------------------------------------------------------------------
 
+static int warnedAboutSlow = 0;
+
 static bool AlphaBlt(HDC hdcDst,
                      int x, int y, int width, int height,
                      int srcX, int srcY, HDC hdcSrc,
@@ -2592,6 +2594,11 @@ static bool AlphaBlt(HDC hdcDst,
     // AlphaBlend() unavailable of failed: use our own (probably much slower)
     // implementation
 #ifdef wxHAVE_RAW_BITMAP
+    if (!warnedAboutSlow)
+    {
+        fprintf(stderr, "WARNING: using slow non-accelerated wxAlphaBlend\n");
+        warnedAboutSlow = 1;
+    }
     wxAlphaBlend(hdcDst, x, y, width, height, srcX, srcY, bmp);
 
     return true;
