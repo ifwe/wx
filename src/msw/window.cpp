@@ -6104,6 +6104,8 @@ extern wxWindow *wxGetWindowFromHWND(WXHWND hWnd)
         hwnd = ::GetParent(hwnd);
         if (hwnd)
             win = wxFindWinFromHandle((WXHWND)hwnd);
+        else
+            return 0;
     }
 
     return win;
@@ -6641,12 +6643,16 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 
     HWND hWnd = ::WindowFromPoint(pt2);
 
-    wxWindow* win = wxGetWindowFromHWND((WXHWND)hWnd);
+    wxWindow* win = NULL;
+    if (hWnd)
+    {
+        win = wxGetWindowFromHWND((WXHWND)hWnd);
 
-    // don't return a window that is about to be destroyed
-    wxCriticalSectionLocker locker(wxPendingDeleteCS);
-    if (win && wxPendingDelete.Member(reinterpret_cast<wxObject*>(win)))
-        win = NULL;
+        // don't return a window that is about to be destroyed
+        wxCriticalSectionLocker locker(wxPendingDeleteCS);
+        if (win && wxPendingDelete.Member(reinterpret_cast<wxObject*>(win)))
+            win = NULL;
+    }
 
     return win;
 }
