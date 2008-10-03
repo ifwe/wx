@@ -6104,8 +6104,6 @@ extern wxWindow *wxGetWindowFromHWND(WXHWND hWnd)
         hwnd = ::GetParent(hwnd);
         if (hwnd)
             win = wxFindWinFromHandle((WXHWND)hwnd);
-        else
-            return 0;
     }
 
     return win;
