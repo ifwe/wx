@@ -271,7 +271,8 @@ wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *dataOrig) const
     if ( data->m_hBitmap )
     {
         wxDIB dib((HBITMAP)(data->m_hBitmap));
-        self->CopyFromDIB(dib);
+        if (!self->CopyFromDIB(dib))
+            return NULL;
 
         selfdata = wx_static_cast(wxBitmapRefData *, m_refData);
         selfdata->m_hasAlpha = data->m_hasAlpha;
