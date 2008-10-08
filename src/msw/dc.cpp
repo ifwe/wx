@@ -2619,6 +2619,8 @@ wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
              int w, int h,
              int srcX, int srcY, const wxBitmap& bmpSrc)
 {
+    wxCHECK_RET( bmpSrc.Ok(), wxT("invalid bitmap in wxAlphaBlend") );
+
     // get the destination DC pixels
     wxBitmap bmpDst(w, h, 32 /* force creating RGBA DIB */);
     MemoryHDC hdcMem;
