@@ -1039,7 +1039,7 @@ wxEvtHandler::wxEvtHandler()
     m_eventsLocker = new wxCriticalSection;
 #  endif
 #endif
-    
+
     // no client data (yet)
     m_clientData = NULL;
     m_clientDataType = wxClientData_None;
@@ -1165,7 +1165,7 @@ void wxEvtHandler::ProcessPendingEvents()
     // pending events
     wxCHECK_RET( m_pendingEvents,
                  wxT("Please call wxApp::ProcessPendingEvents() instead") );
-    
+
     wxENTER_CRIT_SECT( Lock() );
 
     // we leave the loop once we have processed all events that were present at
@@ -1262,6 +1262,7 @@ bool wxEvtHandler::TryParent(wxEvent& event)
 
 bool wxEvtHandler::ProcessEvent(wxEvent& event)
 {
+#if wxUSE_FILTER_EVENT
     // allow the application to hook into event processing
     if ( wxTheApp )
     {
@@ -1275,6 +1276,7 @@ bool wxEvtHandler::ProcessEvent(wxEvent& event)
         }
         //else: proceed normally
     }
+#endif
 
     // An event handler can be enabled or disabled
     if ( GetEvtHandlerEnabled() )
