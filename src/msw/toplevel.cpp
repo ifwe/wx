@@ -659,7 +659,7 @@ void wxTopLevelWindowMSW::DoShowWindow(int nShowCmd)
 {
     ::ShowWindow(GetHwnd(), nShowCmd);
 
-    m_iconized = nShowCmd == SW_MINIMIZE;
+    m_iconized = nShowCmd == SW_MINIMIZE || nShowCmd == SW_SHOWMINNOACTIVE;
 }
 
 bool wxTopLevelWindowMSW::Show(bool show)
@@ -812,7 +812,7 @@ bool wxTopLevelWindowMSW::IsMaximized() const
 
 void wxTopLevelWindowMSW::Iconize(bool iconize)
 {
-    DoShowWindow(iconize ? SW_MINIMIZE : SW_RESTORE);
+    DoShowWindow(iconize ? SW_SHOWMINNOACTIVE : SW_RESTORE);
 }
 
 bool wxTopLevelWindowMSW::IsIconized() const
