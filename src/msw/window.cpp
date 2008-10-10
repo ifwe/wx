@@ -3442,14 +3442,12 @@ void wxAssociateWinWithHandle(HWND hWnd, wxWindowMSW *win)
                  wxT("attempt to add a NULL hWnd to window list ignored") );
 
     wxWindow *oldWin = wxFindWinFromHandle((WXHWND) hWnd);
-#ifdef __WXDEBUG__
-    if ( oldWin && (oldWin != win) )
+    if (oldWin && (oldWin != win))
     {
-        wxLogDebug(wxT("HWND %X already associated with another window (%s)"),
-                   (int) hWnd, win->GetClassInfo()->GetClassName());
-    }
-    else
-#endif // __WXDEBUG__
+        wxString errmsg(wxString::Format(wxT("HWND %X already associated with another window (%s)"),
+                                         (int)hWnd, win->GetClassInfo()->GetClassName()));
+        wxFAIL_MSG(errmsg);
+    } else
     if (!oldWin)
     {
         wxWinHandleHash->Put((long)hWnd, (wxWindow *)win);
@@ -3458,7 +3456,13 @@ void wxAssociateWinWithHandle(HWND hWnd, wxWindowMSW *win)
 
 void wxRemoveHandleAssociation(wxWindowMSW *win)
 {
-    wxWinHandleHash->Delete((long)win->GetHWND());
+    wxWindow* obj = wxWinHandleHash->Delete((long)win->GetHWND());
+    if (!obj)
+    {
+        wxString errmsg(wxString::Format(wxT("could not remove hwnd->wxWindow* association for win at %p with HWND %X"),
+                                         win, (long)win->GetHWND()));
+        wxFAIL_MSG(errmsg);
+    }
 }
 
 // ----------------------------------------------------------------------------
