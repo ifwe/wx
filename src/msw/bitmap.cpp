@@ -675,16 +675,16 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth, const wxDC& dc)
             unsigned char green = image.GetGreen(i, j);
             unsigned char blue = image.GetBlue(i, j);
 
-            ::SetPixel(hMemDC, i, j, PALETTERGB(red, green, blue));
+            ::SetPixelV(hMemDC, i, j, PALETTERGB(red, green, blue));
 
             if (hasMask)
             {
                 // scan the bitmap for the transparent colour and set the corresponding
                 // pixels in the mask to BLACK and the rest to WHITE
                 if (maskR == red && maskG == green && maskB == blue)
-                    ::SetPixel(hMaskDC, i, j, PALETTERGB(0, 0, 0));
+                    ::SetPixelV(hMaskDC, i, j, PALETTERGB(0, 0, 0));
                 else
-                    ::SetPixel(hMaskDC, i, j, PALETTERGB(255, 255, 255));
+                    ::SetPixelV(hMaskDC, i, j, PALETTERGB(255, 255, 255));
             }
         }
     }

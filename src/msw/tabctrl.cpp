@@ -414,7 +414,7 @@ void wxMapBitmap(HBITMAP hBitmap, int width, int height)
             {
                 if ( ColorMap[k].from == pixel )
                 {
-                    /* COLORREF actualPixel = */ ::SetPixel(hdcMem, i, j, ColorMap[k].to);
+                    /* COLORREF actualPixel = */ ::SetPixelV(hdcMem, i, j, ColorMap[k].to);
                     break;
                 }
             }
