@@ -84,6 +84,11 @@ wxTimer::~wxTimer()
 
 bool wxTimer::Start(int milliseconds, bool oneShot)
 {
+#if wxUSE_THREADS
+    wxASSERT_MSG( wxThread::IsMain(),
+                  _T("timer can only be started from the main thread") );
+#endif // wxUSE_THREADS
+
     (void)wxTimerBase::Start(milliseconds, oneShot);
 
     wxCHECK_MSG( m_milli > 0, false, wxT("invalid value for timer timeout") );
@@ -123,14 +128,19 @@ bool wxTimer::Start(int milliseconds, bool oneShot)
 
 void wxTimer::Stop()
 {
+#if wxUSE_THREADS
+    wxASSERT_MSG( wxThread::IsMain(),
+                  _T("timer can only be stopped from the main thread") );
+#endif // wxUSE_THREADS
+
     if ( m_id )
     {
         TimerMap().erase(m_id);
         if (!::KillTimer(NULL, m_id))
             wxLogApiError(_T("KillTimer"), ::GetLastError());
-    }
 
-    m_id = 0;
+        m_id = 0;
+    }
 }
 
 // ----------------------------------------------------------------------------
