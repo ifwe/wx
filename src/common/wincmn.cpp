@@ -296,6 +296,14 @@ bool wxWindowBase::ToggleWindowStyle(int flag)
     return rc;
 }
 
+struct WXDLLEXPORT wxWindowNext
+{
+    wxWindow *win;
+    wxWindowNext *next;
+} *wxWindowBase::ms_winCaptureNext = NULL;
+wxWindow *wxWindowBase::ms_winCaptureCurrent = NULL;
+bool wxWindowBase::ms_winCaptureChanging = false;
+
 // ----------------------------------------------------------------------------
 // destruction
 // ----------------------------------------------------------------------------
@@ -303,7 +311,16 @@ bool wxWindowBase::ToggleWindowStyle(int flag)
 // common clean up
 wxWindowBase::~wxWindowBase()
 {
-    wxASSERT_MSG( GetCapture() != this, wxT("attempt to destroy window with mouse capture") );
+    if ( ms_winCaptureCurrent  == this)
+    {
+        ms_winCaptureCurrent = NULL;
+        while ( ms_winCaptureNext )
+        {
+            wxWindowNext *item = ms_winCaptureNext;
+            ms_winCaptureNext = item->next;
+            delete item;
+        }
+    }
 
     // FIXME if these 2 cases result from programming errors in the user code
     //       we should probably assert here instead of silently fixing them
@@ -2494,14 +2511,6 @@ wxHitTest wxWindowBase::DoHitTest(wxCoord x, wxCoord y) const
 // ----------------------------------------------------------------------------
 // mouse capture
 // ----------------------------------------------------------------------------
-
-struct WXDLLEXPORT wxWindowNext
-{
-    wxWindow *win;
-    wxWindowNext *next;
-} *wxWindowBase::ms_winCaptureNext = NULL;
-wxWindow *wxWindowBase::ms_winCaptureCurrent = NULL;
-bool wxWindowBase::ms_winCaptureChanging = false;
 
 void wxWindowBase::CaptureMouse()
 {
