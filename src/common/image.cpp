@@ -1862,6 +1862,12 @@ bool wxImage::SetMaskFromImage(const wxImage& mask,
     unsigned char *imgdata = GetData();
     unsigned char *maskdata = mask.GetData();
 
+    if (maskdata == NULL)
+    {
+        wxLogError(_("Mask data was null."));
+        return false;
+    }
+
     const int w = GetWidth();
     const int h = GetHeight();
 
