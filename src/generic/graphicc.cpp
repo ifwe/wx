@@ -39,7 +39,12 @@
 #include "wx/graphics.h"
 #include "wx/rawbmp.h"
 
-#if wxUSE_GRAPHICS_CONTEXT
+#if !wxUSE_CAIRO
+#error "not using cairo"
+#endif
+
+
+#if wxUSE_GRAPHICS_CONTEXT && wxUSE_CAIRO
 
 #include <vector>
 
@@ -100,6 +105,10 @@ static inline double RadToDeg(double deg)
 #endif
 
 #include <cairo.h>
+#ifdef __WXMSW__
+#include <cairo-win32.h>
+#endif
+
 #ifdef __WXGTK__
 #include <gtk/gtk.h>
 #endif
@@ -307,6 +316,9 @@ class WXDLLIMPEXP_CORE wxCairoContext : public wxGraphicsContext
 
 public:
     wxCairoContext( wxGraphicsRenderer* renderer, const wxWindowDC& dc );
+#ifdef __WXMSW__
+    wxCairoContext( wxGraphicsRenderer* renderer, HDC context );
+#endif
 #ifdef __WXGTK__
     wxCairoContext( wxGraphicsRenderer* renderer, GdkDrawable *drawable );
 #endif
@@ -353,6 +365,9 @@ public:
 
 private:
     cairo_t* m_context;
+#ifdef __WXMSW__
+    cairo_surface_t* m_mswSurface;
+#endif
 };
 
 //-----------------------------------------------------------------------------
@@ -985,6 +1000,18 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, GdkDrawable *drawa
 }
 #endif
 
+#ifdef __WXMSW__
+wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, HDC handle )
+: wxGraphicsContext(renderer)
+{
+    m_mswSurface = cairo_win32_surface_create(handle);
+    m_context = cairo_create(m_mswSurface);
+    PushState();
+    PushState();
+}
+#endif
+
+
 wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, cairo_t *context )
 : wxGraphicsContext(renderer)
 {
@@ -1016,6 +1043,10 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window)
     GdkDrawable* drawable = pizza->bin_window;
     m_context = gdk_cairo_create( drawable ) ;
 #endif
+#ifdef __WXMSW__
+    m_mswSurface = cairo_win32_surface_create((HDC)window->GetHandle());
+    m_context = cairo_create(m_mswSurface);
+#endif
     PushState();
     PushState();
 }
@@ -1028,6 +1059,10 @@ wxCairoContext::~wxCairoContext()
         PopState();
         cairo_destroy(m_context);
     }
+#ifdef __WXMSW__
+    if ( m_mswSurface )
+        cairo_surface_destroy(m_mswSurface);
+#endif
 }
 
 
@@ -1400,7 +1435,12 @@ wxGraphicsContext * wxCairoRenderer::CreateContext( const wxMemoryDC& dc)
 
 wxGraphicsContext * wxCairoRenderer::CreateContextFromNativeContext( void * context )
 {
+#if __WXMSW__
+    return new wxCairoContext(this,(HDC)context);
+#endif
+#if __WXGTK__
     return new wxCairoContext(this,(cairo_t*)context);
+#endif
 }
 
 
@@ -1507,4 +1547,15 @@ wxGraphicsFont wxCairoRenderer::CreateFont( const wxFont &font , const wxColour 
         return wxNullGraphicsFont;
 }
 
-#endif  // wxUSE_GRAPHICS_CONTEXT
+#endif  // wxUSE_GRAPHICS_CONTEXT && wxUSE_CAIRO
+
+#if wxUSE_GRAPHICS_CONTEXT
+wxGraphicsRenderer* wxGraphicsRenderer::GetCairoRenderer()
+{
+#if wxUSE_CAIRO
+    return &gs_cairoGraphicsRenderer;
+#else
+    return NULL;
+#endif
+}
+#endif

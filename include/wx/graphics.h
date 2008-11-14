@@ -644,9 +644,11 @@ public :
 
     static wxGraphicsRenderer* GetDefaultRenderer();
 
+    static wxGraphicsRenderer* GetCairoRenderer();
+
     // Context
 
-    virtual wxGraphicsContext * CreateContext( const wxDC& dc) = 0 ;
+    virtual wxGraphicsContext * CreateContext( const wxDC& dc);
 #ifdef __WXMSW__
     virtual wxGraphicsContext * CreateContext( const wxMemoryDC& dc) = 0 ;
 #endif
