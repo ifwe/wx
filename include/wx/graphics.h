@@ -648,7 +648,7 @@ public :
 
     // Context
 
-    virtual wxGraphicsContext * CreateContext( const wxDC& dc);
+    virtual wxGraphicsContext * CreateContext( const wxDC& dc) = 0;
 #ifdef __WXMSW__
     virtual wxGraphicsContext * CreateContext( const wxMemoryDC& dc) = 0 ;
 #endif

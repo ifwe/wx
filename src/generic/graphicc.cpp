@@ -315,15 +315,17 @@ class WXDLLIMPEXP_CORE wxCairoContext : public wxGraphicsContext
     DECLARE_NO_COPY_CLASS(wxCairoContext)
 
 public:
-    wxCairoContext( wxGraphicsRenderer* renderer, const wxWindowDC& dc );
+    wxCairoContext(wxGraphicsRenderer* renderer, const wxDC& dc );
+    wxCairoContext(wxGraphicsRenderer* renderer, const wxWindowDC& dc );
+    wxCairoContext(wxGraphicsRenderer* renderer, const wxMemoryDC& dc );
 #ifdef __WXMSW__
-    wxCairoContext( wxGraphicsRenderer* renderer, HDC context );
+    wxCairoContext(wxGraphicsRenderer* renderer, HDC context );
 #endif
 #ifdef __WXGTK__
-    wxCairoContext( wxGraphicsRenderer* renderer, GdkDrawable *drawable );
+    wxCairoContext(wxGraphicsRenderer* renderer, GdkDrawable *drawable );
 #endif
-    wxCairoContext( wxGraphicsRenderer* renderer, cairo_t *context );
-    wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window);
+    wxCairoContext(wxGraphicsRenderer* renderer, cairo_t *context );
+    wxCairoContext(wxGraphicsRenderer* renderer, wxWindow *window);
     wxCairoContext();
     virtual ~wxCairoContext();
 
@@ -362,6 +364,10 @@ public:
     virtual void GetTextExtent( const wxString &str, wxDouble *width, wxDouble *height,
                                 wxDouble *descent, wxDouble *externalLeading ) const;
     virtual void GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const;
+
+    // stubs
+    virtual void DrawBitmap(const wxGraphicsBitmap&, wxDouble, wxDouble, wxDouble, wxDouble) {}
+
 
 private:
     cairo_t* m_context;
@@ -980,11 +986,40 @@ void * wxCairoMatrixData::GetNativeMatrix() const
 // wxCairoContext implementation
 //-----------------------------------------------------------------------------
 
+wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxDC& dc )
+: wxGraphicsContext(renderer)
+{
+#ifdef __WXGTK__
+    m_context = gdk_cairo_create( dc.m_window ) ;
+#elif __WXMSW__
+    m_mswSurface = cairo_win32_surface_create((HDC)dc.GetHDC());
+    m_context = cairo_create(m_mswSurface);
+#endif
+    PushState();
+    PushState();
+}
+
 wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxWindowDC& dc )
 : wxGraphicsContext(renderer)
 {
 #ifdef __WXGTK__
     m_context = gdk_cairo_create( dc.m_window ) ;
+#elif __WXMSW__
+    m_mswSurface = cairo_win32_surface_create((HDC)dc.GetHDC());
+    m_context = cairo_create(m_mswSurface);
+#endif
+    PushState();
+    PushState();
+}
+
+wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxMemoryDC& dc )
+: wxGraphicsContext(renderer)
+{
+#ifdef __WXGTK__
+    m_context = gdk_cairo_create( dc.m_window ) ;
+#elif __WXMSW__
+    m_mswSurface = cairo_win32_surface_create((HDC)dc.GetHDC());
+    m_context = cairo_create(m_mswSurface);
 #endif
     PushState();
     PushState();
@@ -1042,8 +1077,7 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window)
     GtkPizza *pizza = GTK_PIZZA( widget );
     GdkDrawable* drawable = pizza->bin_window;
     m_context = gdk_cairo_create( drawable ) ;
-#endif
-#ifdef __WXMSW__
+#elif __WXMSW__
     m_mswSurface = cairo_win32_surface_create((HDC)window->GetHandle());
     m_context = cairo_create(m_mswSurface);
 #endif
@@ -1362,6 +1396,7 @@ public :
 
     // Context
 
+    virtual wxGraphicsContext * CreateContext( const wxDC& dc);
     virtual wxGraphicsContext * CreateContext( const wxWindowDC& dc);
 
 #ifdef __WXMSW__
@@ -1402,6 +1437,9 @@ public :
     // sets the font
     virtual wxGraphicsFont CreateFont( const wxFont &font , const wxColour &col = *wxBLACK ) ;
 
+    // stubs
+    virtual wxGraphicsBitmap CreateBitmap(const wxBitmap& bmp) { return wxGraphicsBitmap(); } 
+
 private :
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxCairoRenderer)
 } ;
@@ -1414,12 +1452,15 @@ IMPLEMENT_DYNAMIC_CLASS(wxCairoRenderer,wxGraphicsRenderer)
 
 static wxCairoRenderer gs_cairoGraphicsRenderer;
 
-#ifdef __WXGTK__
 wxGraphicsRenderer* wxGraphicsRenderer::GetDefaultRenderer()
 {
     return &gs_cairoGraphicsRenderer;
 }
-#endif
+
+wxGraphicsContext * wxCairoRenderer::CreateContext( const wxDC& dc)
+{
+    return new wxCairoContext(this, dc);
+}
 
 wxGraphicsContext * wxCairoRenderer::CreateContext( const wxWindowDC& dc)
 {
@@ -1429,7 +1470,7 @@ wxGraphicsContext * wxCairoRenderer::CreateContext( const wxWindowDC& dc)
 #ifdef __WXMSW__
 wxGraphicsContext * wxCairoRenderer::CreateContext( const wxMemoryDC& dc)
 {
-    return NULL;
+    return new wxCairoContext(this, dc);
 }
 #endif
 

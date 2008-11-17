@@ -1452,10 +1452,12 @@ IMPLEMENT_DYNAMIC_CLASS(wxGDIPlusRenderer,wxGraphicsRenderer)
 
 static wxGDIPlusRenderer gs_GDIPlusRenderer;
 
+#if !wxUSE_CAIRO
 wxGraphicsRenderer* wxGraphicsRenderer::GetDefaultRenderer()
 {
     return &gs_GDIPlusRenderer;
 }
+#endif
 
 void wxGDIPlusRenderer::EnsureIsLoaded()
 {
