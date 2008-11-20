@@ -1356,7 +1356,11 @@ HWND wxTLWHiddenParentModule::GetHWND()
     // remove old unused hidden windows
     removeOldHiddenParents();
     
-    HWND hwnd = ::CreateWindow(ms_className, wxEmptyString, 0, 0, 0, 0, 0, NULL,
+    HWND hwnd = ::CreateWindow(ms_className, wxEmptyString,
+                               0,     // dwStyle
+                               -20000, -20000,  // x, y
+                               0, 0,  // width, height
+                               NULL,
                                (HMENU)NULL, wxGetInstance(), NULL);
 
     if (!hwnd)
