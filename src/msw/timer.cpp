@@ -149,12 +149,15 @@ void wxTimer::Stop()
 
 void wxProcessTimer(wxTimer& timer)
 {
-    wxASSERT_MSG( timer.m_id != 0, _T("bogus timer id") );
+    // wxASSERT_MSG( timer.m_id != 0, _T("bogus timer id") );
 
-    if ( timer.IsOneShot() )
-        timer.Stop();
+    if ( timer.m_id )
+    {
+        if ( timer.IsOneShot() )
+            timer.Stop();
 
-    timer.Notify();
+        timer.Notify();
+    }
 }
 
 void WINAPI
