@@ -21,7 +21,7 @@ class WXDLLIMPEXP_FWD_ADV wxTaskBarIconWindow;
 class WXDLLIMPEXP_ADV wxTaskBarIcon : public wxTaskBarIconBase
 {
 public:
-    wxTaskBarIcon();
+    wxTaskBarIcon(int id = 99);
     virtual ~wxTaskBarIcon();
 
     // Accessors
@@ -32,6 +32,8 @@ public:
     bool SetIcon(const wxIcon& icon, const wxString& tooltip = wxEmptyString);
     bool RemoveIcon(void);
     bool PopupMenu(wxMenu *menu);
+
+    int GetId() const { return m_id; }
 
     // MSW-specific class methods
 
@@ -64,6 +66,7 @@ protected:
     bool                 m_iconAdded;
     wxIcon               m_icon;
     wxString             m_strTooltip;
+    int                  m_id;
 
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxTaskBarIcon)
 };

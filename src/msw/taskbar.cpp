@@ -131,7 +131,7 @@ private:
 
 struct NotifyIconData : public NOTIFYICONDATA
 {
-    NotifyIconData(WXHWND hwnd)
+    NotifyIconData(WXHWND hwnd, int id)
     {
         memset(this, 0, sizeof(NOTIFYICONDATA));
         cbSize = sizeof(NOTIFYICONDATA);
@@ -139,9 +139,7 @@ struct NotifyIconData : public NOTIFYICONDATA
         uCallbackMessage = gs_msgTaskbar;
         uFlags = NIF_MESSAGE;
 
-        // we use the same id for all taskbar icons as we don't need it to
-        // distinguish between them
-        uID = 99;
+        uID = id;
     }
 };
 
@@ -149,9 +147,10 @@ struct NotifyIconData : public NOTIFYICONDATA
 // wxTaskBarIcon
 // ----------------------------------------------------------------------------
 
-wxTaskBarIcon::wxTaskBarIcon()
+wxTaskBarIcon::wxTaskBarIcon(int id)
 {
     m_win = NULL;
+    m_id = id;
     m_iconAdded = false;
     RegisterWindowMessages();
 }
@@ -185,7 +184,7 @@ bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
     m_icon = icon;
     m_strTooltip = tooltip;
 
-    NotifyIconData notifyData(GetHwndOf(m_win));
+    NotifyIconData notifyData(GetHwndOf(m_win), GetId());
 
     if (icon.Ok())
     {
@@ -225,7 +224,7 @@ wxTaskBarIcon::ShowBalloon(const wxString& title,
 
     // we need to enable version 5.0 behaviour to receive notifications about
     // the balloon disappearance
-    NotifyIconData notifyData(hwnd);
+    NotifyIconData notifyData(hwnd, GetId());
     notifyData.uFlags = 0;
     notifyData.uVersion = 3 /* NOTIFYICON_VERSION for Windows XP */;
 
@@ -233,7 +232,7 @@ wxTaskBarIcon::ShowBalloon(const wxString& title,
 
 
     // do show the balloon now
-    notifyData = NotifyIconData(hwnd);
+    notifyData = NotifyIconData(hwnd, GetId());
     notifyData.uFlags |= NIF_INFO;
     notifyData.uTimeout = msec;
     wxStrncpy(notifyData.szInfo, text.wx_str(), WXSIZEOF(notifyData.szInfo));
@@ -259,7 +258,7 @@ bool wxTaskBarIcon::RemoveIcon()
 
     m_iconAdded = false;
 
-    NotifyIconData notifyData(GetHwndOf(m_win));
+    NotifyIconData notifyData(GetHwndOf(m_win), GetId());
 
     return wxShellNotifyIcon(NIM_DELETE, &notifyData) != 0;
 }
