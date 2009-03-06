@@ -39,10 +39,6 @@
 #include "wx/graphics.h"
 #include "wx/rawbmp.h"
 
-#if !wxUSE_CAIRO
-#error "not using cairo"
-#endif
-
 
 #if wxUSE_GRAPHICS_CONTEXT && wxUSE_CAIRO
 
