@@ -79,15 +79,7 @@ void wxGCDC::SetGraphicsContext( wxGraphicsContext* ctx )
 wxGCDC::wxGCDC(const wxWindowDC& dc)
 {
     Init();
-    wxGraphicsContext* context;
-#if wxUSE_CAIRO
-    wxGraphicsRenderer* renderer = wxGraphicsRenderer::GetCairoRenderer();
-    context = renderer->CreateContext(dc);
-#else
-    context = wxGraphicsContext::Create(dc);
-#endif
-
-    SetGraphicsContext( context );
+    SetGraphicsContext( wxGraphicsContext::Create(dc) );
 }
 
 #ifdef __WXMSW__

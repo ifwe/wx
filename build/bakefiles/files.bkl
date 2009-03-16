@@ -666,7 +666,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/generic/dragimgg.cpp
     src/generic/filepickerg.cpp
     src/generic/fontpickerg.cpp
-    src/generic/graphicc.cpp
     src/generic/listbkg.cpp
     src/generic/logg.cpp
     src/generic/numdlgg.cpp

@@ -644,8 +644,6 @@ public :
 
     static wxGraphicsRenderer* GetDefaultRenderer();
 
-    static wxGraphicsRenderer* GetCairoRenderer();
-
     // Context
 
     virtual wxGraphicsContext * CreateContext( const wxDC& dc) = 0;

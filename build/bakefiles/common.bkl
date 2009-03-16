@@ -485,7 +485,6 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
         <if cond="FORMAT!='autoconf'"><define>$(GFXCTX_DEFINE)</define></if>
         <include cond="FORMAT!='autoconf'">$(SETUPHDIR)</include>
         <include cond="FORMAT!='autoconf'">$(TOP_SRCDIR)include</include>
-        <include cond="FORMAT!='autoconf'">$(TOP_SRCDIR)external/cairo-dev/include/cairo</include>
         <lib-path>$(LIBDIRNAME)</lib-path>
         <if cond="TOOLKIT=='MGL' and FORMAT=='watcom'">
             <lib-path>$(MGLLIBPATH)</lib-path>
@@ -531,8 +530,6 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
         <if cond="FORMAT!='autoconf' and PLATFORM_WIN32=='1'">
             <sys-lib>$(UNICOWS_LIB)</sys-lib>
             <sys-lib>$(GDIPLUS_LIB)</sys-lib>
-            <sys-lib>cairo</sys-lib>
-            <lib-path>$(TOP_SRCDIR)external/cairo-dev/lib</lib-path>
             <if cond="FORMAT=='borland'">
                 <sys-lib>ole2w32</sys-lib>
             </if>
