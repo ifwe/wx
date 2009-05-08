@@ -4,7 +4,7 @@
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     2006-09-30
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: graphics.cpp 56880 2008-11-21 04:46:57Z KO $
 // Copyright:   (c) 2006 Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -91,6 +91,11 @@ static inline double RadToDeg(double deg) { return (deg * 180.0) / M_PI; }
 
 #include "gdiplus.h"
 using namespace Gdiplus;
+
+static inline Color colorForWxColour(const wxColour& colour)
+{
+    return Color(colour.Alpha(), colour.Red(), colour.Green(), colour.Blue());
+}
 
 class WXDLLIMPEXP_CORE wxGDIPlusPathData : public wxGraphicsPathData
 {
@@ -263,12 +268,20 @@ class WXDLLIMPEXP_CORE wxGDIPlusBitmapData : public wxGraphicsObjectRefData
 public:
     wxGDIPlusBitmapData( wxGraphicsRenderer* renderer );
     wxGDIPlusBitmapData( wxGraphicsRenderer* renderer, const wxBitmap &bmp );
+    wxGDIPlusBitmapData(wxGraphicsRenderer* renderer, Bitmap* bitmap);
     ~wxGDIPlusBitmapData ();
 
     virtual Bitmap* GetGDIPlusBitmap() { return m_bitmap; }
+    CachedBitmap* GetCachedBitmap(Graphics* context, const wxSize& size, bool invalidate = false);
+    wxGraphicsObjectRefData* Clone() const;
+    bool GetSolidColor(wxColour& colour) const;
 
 private :
     Bitmap* m_bitmap;
+    Bitmap* m_helper;
+
+    CachedBitmap* m_cachedBitmap;
+    wxSize m_cachedSize;
 };
 
 class WXDLLIMPEXP_CORE wxGDIPlusFontData : public wxGraphicsObjectRefData
@@ -325,7 +338,7 @@ public:
     // gets the matrix of this context
     virtual wxGraphicsMatrix GetTransform() const;
 
-    virtual void DrawBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h );
+    void DrawGraphicsBitmapInternal( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h );
     virtual void DrawBitmap( const wxBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h );
     virtual void DrawIcon( const wxIcon &icon, wxDouble x, wxDouble y, wxDouble w, wxDouble h );
     virtual void PushState();
@@ -395,8 +408,7 @@ wxGDIPlusPenData::wxGDIPlusPenData( wxGraphicsRenderer* renderer, const wxPen &p
     if (m_width <= 0.0)
         m_width = 0.1;
 
-    m_pen = new Pen(Color( pen.GetColour().Alpha() , pen.GetColour().Red() ,
-        pen.GetColour().Green() , pen.GetColour().Blue() ), m_width );
+    m_pen = new Pen(colorForWxColour(pen.GetColour()), m_width);
 
     LineCap cap;
     switch ( pen.GetCap() )
@@ -519,8 +531,7 @@ wxGDIPlusPenData::wxGDIPlusPenData( wxGraphicsRenderer* renderer, const wxPen &p
                 break ;
 
             }
-            m_penBrush = new HatchBrush(style,Color( pen.GetColour().Alpha() , pen.GetColour().Red() ,
-                pen.GetColour().Green() , pen.GetColour().Blue() ), Color::Transparent );
+            m_penBrush = new HatchBrush(style, colorForWxColour(pen.GetColour()), Color::Transparent);
             m_pen->SetBrush( m_penBrush );
         }
         break;
@@ -540,13 +551,13 @@ wxGDIPlusBrushData::wxGDIPlusBrushData( wxGraphicsRenderer* renderer )
 }
 
 wxGDIPlusBrushData::wxGDIPlusBrushData( wxGraphicsRenderer* renderer , const wxBrush &brush )
-: wxGraphicsObjectRefData(renderer)
+    : wxGraphicsObjectRefData(renderer)
 {
     Init();
     if ( brush.GetStyle() == wxSOLID)
     {
-        m_brush = new SolidBrush( Color( brush.GetColour().Alpha() , brush.GetColour().Red() ,
-            brush.GetColour().Green() , brush.GetColour().Blue() ) );
+        wxColour c = brush.GetColour();
+        m_brush = new SolidBrush(colorForWxColour(c));
     }
     else if ( brush.IsHatch() )
     {
@@ -573,8 +584,7 @@ wxGDIPlusBrushData::wxGDIPlusBrushData( wxGraphicsRenderer* renderer , const wxB
             break ;
 
         }
-        m_brush = new HatchBrush(style,Color( brush.GetColour().Alpha() , brush.GetColour().Red() ,
-            brush.GetColour().Green() , brush.GetColour().Blue() ), Color::Transparent );
+        m_brush = new HatchBrush(style, colorForWxColour(brush.GetColour()), Color::Transparent);
     }
     else
     {
@@ -604,9 +614,7 @@ void wxGDIPlusBrushData::Init()
 
 void wxGDIPlusBrushData::CreateLinearGradientBrush( wxDouble x1, wxDouble y1, wxDouble x2, wxDouble y2, const wxColour&c1, const wxColour&c2)
 {
-    m_brush = new LinearGradientBrush( PointF( x1,y1) , PointF( x2,y2),
-        Color( c1.Alpha(), c1.Red(),c1.Green() , c1.Blue() ),
-        Color( c2.Alpha(), c2.Red(),c2.Green() , c2.Blue() ));
+    m_brush = new LinearGradientBrush(PointF(x1, y1), PointF(x2, y2), colorForWxColour(c1), colorForWxColour(c2));
 }
 
 void wxGDIPlusBrushData::CreateRadialGradientBrush( wxDouble xo, wxDouble yo, wxDouble xc, wxDouble yc, wxDouble radius,
@@ -619,48 +627,21 @@ void wxGDIPlusBrushData::CreateRadialGradientBrush( wxDouble xo, wxDouble yo, wx
     PathGradientBrush *b = new PathGradientBrush(m_brushPath);
     m_brush = b;
     b->SetCenterPoint( PointF(xo,yo));
-    b->SetCenterColor(Color( oColor.Alpha(), oColor.Red(),oColor.Green() , oColor.Blue() ));
+    b->SetCenterColor(colorForWxColour(oColor));
 
-    Color colors[] = {Color( cColor.Alpha(), cColor.Red(),cColor.Green() , cColor.Blue() )};
+    Color colors[] = {colorForWxColour(cColor)};
     int count = 1;
     b->SetSurroundColors(colors, &count);
 }
 
-//-----------------------------------------------------------------------------
-// wxGDIPlusFont implementation
-//-----------------------------------------------------------------------------
-
-wxGDIPlusFontData::wxGDIPlusFontData( wxGraphicsRenderer* renderer, const wxFont &font,
-                             const wxColour& col ) : wxGraphicsObjectRefData( renderer )
-{
-    m_textBrush = NULL;
-    m_font = NULL;
-
-    wxWCharBuffer s = font.GetFaceName().wc_str( *wxConvUI );
-    int size = font.GetPointSize();
-    int style = FontStyleRegular;
-    if ( font.GetStyle() == wxFONTSTYLE_ITALIC )
-        style |= FontStyleItalic;
-    if ( font.GetUnderlined() )
-        style |= FontStyleUnderline;
-    if ( font.GetWeight() == wxFONTWEIGHT_BOLD )
-        style |= FontStyleBold;
-    m_font = new Font( s , size , style );
-    m_textBrush = new SolidBrush( Color( col.Alpha() , col.Red() ,
-        col.Green() , col.Blue() ));
-}
-
-wxGDIPlusFontData::~wxGDIPlusFontData()
-{
-    delete m_textBrush;
-    delete m_font;
-}
-
-wxGDIPlusBitmapData::wxGDIPlusBitmapData( wxGraphicsRenderer* renderer,
-                        const wxBitmap &bmp) : wxGraphicsObjectRefData( renderer )
+wxGDIPlusBitmapData::wxGDIPlusBitmapData(
+        wxGraphicsRenderer* renderer, 
+        const wxBitmap &bmp)
+    : wxGraphicsObjectRefData(renderer)
+    , m_cachedBitmap(NULL)
 {
     m_bitmap = NULL;
-    Bitmap* helper = NULL;
+    m_helper = NULL;
     Bitmap* image = NULL;
     if ( bmp.GetMask() )
     {
@@ -726,27 +707,114 @@ wxGDIPlusBitmapData::wxGDIPlusBitmapData( wxGraphicsRenderer* renderer,
             size_t width = image->GetWidth();
             size_t height = image->GetHeight();
             Rect bounds(0,0,width,height);
-            BitmapData data ;
+            static BitmapData data ;
 
-            helper = image ;
+            m_helper = image ;
             image = NULL ;
-            helper->LockBits(&bounds, ImageLockModeRead,
-                helper->GetPixelFormat(),&data);
+            m_helper->LockBits(&bounds, ImageLockModeRead,
+                m_helper->GetPixelFormat(),&data);
 
             image = new Bitmap(data.Width, data.Height, data.Stride,
                 PixelFormat32bppPARGB , (BYTE*) data.Scan0);
 
-            helper->UnlockBits(&data);
+            m_helper->UnlockBits(&data);
         }
     }
-    if ( image )
+
+    if (image)
         m_bitmap = image;
-    delete helper;
+}
+
+wxGDIPlusBitmapData::wxGDIPlusBitmapData(
+        wxGraphicsRenderer* renderer, 
+        Bitmap* bitmap)
+    : wxGraphicsObjectRefData(renderer)
+    , m_bitmap(bitmap)
+    , m_helper(NULL)
+    , m_cachedBitmap(NULL)
+{
 }
 
 wxGDIPlusBitmapData::~wxGDIPlusBitmapData()
 {
     delete m_bitmap;
+    delete m_helper;
+
+    if (m_cachedBitmap)
+        delete m_cachedBitmap;
+}
+
+CachedBitmap* wxGDIPlusBitmapData::GetCachedBitmap(Graphics* context, const wxSize& size, bool invalidate /*=false*/)
+{
+    if (m_cachedBitmap)
+        if (m_cachedSize == size && !invalidate)
+            return m_cachedBitmap;
+        else
+            delete m_cachedBitmap;
+    
+    if (!m_bitmap)
+        return NULL;
+
+    if (size == wxSize(m_bitmap->GetWidth(), m_bitmap->GetHeight()))
+    {
+        // The requested size matches our bitmap size.
+        m_cachedBitmap = new CachedBitmap(m_bitmap, context);
+    }
+    else
+    {
+        // Otherwise, we need to resample the image.
+        Bitmap* resized = new Bitmap(size.x, size.y, m_bitmap->GetPixelFormat());
+        Graphics* graphics = Graphics::FromImage(resized);
+        graphics->SetSmoothingMode(SmoothingModeHighQuality);
+        graphics->SetInterpolationMode(InterpolationModeHighQualityBicubic);
+        graphics->DrawImage(m_bitmap, 0, 0, size.x, size.y);
+        m_cachedBitmap = new CachedBitmap(resized, context);
+        delete resized;
+    }
+
+    m_cachedSize = size;
+    return m_cachedBitmap;
+}
+
+wxGraphicsObjectRefData* wxGDIPlusBitmapData::Clone() const
+{
+    Bitmap* clonedBitmap;
+    if (m_bitmap)
+        clonedBitmap = m_bitmap->Clone(Rect(0, 0, m_bitmap->GetWidth(), m_bitmap->GetHeight()), m_bitmap->GetPixelFormat());
+    else
+        clonedBitmap = 0;
+
+    wxGDIPlusBitmapData* newData = new wxGDIPlusBitmapData(GetRenderer(), clonedBitmap);
+    return newData;
+}
+
+//-----------------------------------------------------------------------------
+// wxGDIPlusFont implementation
+//-----------------------------------------------------------------------------
+
+wxGDIPlusFontData::wxGDIPlusFontData( wxGraphicsRenderer* renderer, const wxFont &font,
+                             const wxColour& col ) : wxGraphicsObjectRefData( renderer )
+{
+    m_textBrush = NULL;
+    m_font = NULL;
+
+    wxWCharBuffer s = font.GetFaceName().wc_str( *wxConvUI );
+    int size = font.GetPointSize();
+    int style = FontStyleRegular;
+    if ( font.GetStyle() == wxFONTSTYLE_ITALIC )
+        style |= FontStyleItalic;
+    if ( font.GetUnderlined() )
+        style |= FontStyleUnderline;
+    if ( font.GetWeight() == wxFONTWEIGHT_BOLD )
+        style |= FontStyleBold;
+    m_font = new Font( s , size , style );
+    m_textBrush = new SolidBrush(colorForWxColour(col));
+}
+
+wxGDIPlusFontData::~wxGDIPlusFontData()
+{
+    delete m_textBrush;
+    delete m_font;
 }
 
 //-----------------------------------------------------------------------------
@@ -813,7 +881,7 @@ void wxGDIPlusPathData::GetCurrentPoint( wxDouble* x, wxDouble* y) const
 void wxGDIPlusPathData::AddArc( wxDouble x, wxDouble y, wxDouble r, double startAngle, double endAngle, bool clockwise )
 {
     double sweepAngle = endAngle - startAngle ;
-    if( abs(sweepAngle) >= 2*M_PI)
+    if( fabs(sweepAngle) >= 2*M_PI)
     {
         sweepAngle = 2 * M_PI;
     }
@@ -1013,6 +1081,8 @@ public :
     bool m_offset;
 } ;
 
+static int gs_hdcCount = 0;
+static int gs_hwndCount = 0;
 wxGDIPlusContext::wxGDIPlusContext( wxGraphicsRenderer* renderer, HDC hdc  )
     : wxGraphicsContext(renderer)
 {
@@ -1171,17 +1241,108 @@ void wxGDIPlusContext::PopState()
 // premultiplied format, therefore in the failing cases we create a new bitmap using the non-premultiplied
 // bytes as parameter
 
-void wxGDIPlusContext::DrawBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h )
+#if !wxUSE_CAIRO
+void wxGraphicsContext::DrawGraphicsBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h )
 {
+    static_cast<wxGDIPlusContext*>(this)->DrawGraphicsBitmapInternal(bmp, x, y, w, h);
+}
+#endif
+
+void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h)
+{
+    /*
     Bitmap* image = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData())->GetGDIPlusBitmap();
     if ( image )
-        m_context->DrawImage(image,(REAL) x,(REAL) y,(REAL) w,(REAL) h) ;
+    {
+        if( image->GetWidth() != (UINT) w || image->GetHeight() != (UINT) h )
+        {
+            Rect drawRect((REAL) x, (REAL)y, (REAL)w, (REAL)h);
+            m_context->SetPixelOffsetMode( PixelOffsetModeNone );
+            m_context->DrawImage(image, drawRect, 0 , 0 , image->GetWidth()-1, image->GetHeight()-1, UnitPixel ) ;
+            m_context->SetPixelOffsetMode( PixelOffsetModeHalf );
+        }
+        else
+            m_context->DrawImage(image,(REAL) x,(REAL) y,(REAL) w,(REAL) h) ;
+    }
+    */
+    wxGDIPlusBitmapData* bitmapData = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData());
+
+    CachedBitmap* cachedBitmap = bitmapData->GetCachedBitmap(m_context, wxSize(w, h));
+    if (cachedBitmap) {
+        m_context->SetPixelOffsetMode(PixelOffsetModeNone);
+        m_context->DrawCachedBitmap(cachedBitmap, x, y);
+        m_context->SetPixelOffsetMode(PixelOffsetModeHalf);
+    }
+}
+
+bool wxGraphicsBitmap::GetSolidColor(wxColour& colour) const
+{
+    return static_cast<wxGDIPlusBitmapData*>(GetRefData())->GetSolidColor(colour);
+}
+
+#define UNPREMULTIPLY(p, a) ((a) ? ((p) * 0xff / (a)) : (p))    
+
+bool wxGDIPlusBitmapData::GetSolidColor(wxColour& colour) const
+{
+    if (!m_bitmap)
+        return false;
+
+    wxASSERT(m_bitmap->GetPixelFormat() == PixelFormat32bppPARGB || m_bitmap->GetPixelFormat() == PixelFormat32bppARGB);
+
+    BitmapData data;
+    unsigned int width = m_bitmap->GetWidth();
+    unsigned int height = m_bitmap->GetHeight();
+
+    Rect bounds(0, 0, width, height);
+    m_bitmap->LockBits(&bounds, ImageLockModeRead, m_bitmap->GetPixelFormat(), &data);
+
+    wxUint32* pixels = (wxUint32*)data.Scan0;
+    wxUint32 pixel = pixels[0];
+    wxUint32 nextPixel;
+
+    // Loop through each pixel, breaking out if any two are different.
+    bool isSolid = true;
+    for(wxUint32 row = 0; row < height; ++row)
+    {
+        wxUint32 offset = row * data.Stride / 4;
+        for(wxUint32 col = 0; col < width; ++col)
+        {
+            nextPixel = pixels[offset + col];
+            if (nextPixel != pixel)
+            {
+                isSolid = false;
+                break;
+            }
+
+            pixel = nextPixel;
+        }
+    }
+
+    m_bitmap->UnlockBits(&data);
+
+    if (isSolid) {
+        unsigned char alpha = (0xFF000000 & pixel) >> 24;
+        unsigned char red   = (0x00FF0000 & pixel) >> 16;
+        unsigned char green = (0x0000FF00 & pixel) >> 8;
+        unsigned char blue  = (0x000000FF & pixel);
+        
+        if (m_bitmap->GetPixelFormat() == PixelFormat32bppPARGB)
+            // Unpremultiply the alpha values if the image was stored as PARGB
+            colour = wxColour(UNPREMULTIPLY(red, alpha),
+                              UNPREMULTIPLY(green, alpha),
+                              UNPREMULTIPLY(blue, alpha),
+                              alpha);
+        else
+            colour = wxColour(red, green, blue, alpha);
+    }
+
+    return isSolid;
 }
 
 void wxGDIPlusContext::DrawBitmap( const wxBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h )
 {
     wxGraphicsBitmap bitmap = GetRenderer()->CreateBitmap(bmp);
-    DrawBitmap(bitmap, x, y, w, h);
+    DrawGraphicsBitmapInternal(bitmap, x, y, w, h);
 }
 
 void wxGDIPlusContext::DrawIcon( const wxIcon &icon, wxDouble x, wxDouble y, wxDouble w, wxDouble h )
@@ -1247,7 +1408,9 @@ void wxGDIPlusContext::DrawIcon( const wxIcon &icon, wxDouble x, wxDouble y, wxD
 
 void wxGDIPlusContext::DrawText( const wxString &str, wxDouble x, wxDouble y )
 {
-    if ( m_font.IsNull() || str.IsEmpty())
+    wxCHECK_RET( !m_font.IsNull(), wxT("wxGDIPlusContext::DrawText - no valid font set") );
+
+    if ( str.IsEmpty())
         return ;
 
     wxWCharBuffer s = str.wc_str( *wxConvUI );
@@ -1258,6 +1421,8 @@ void wxGDIPlusContext::DrawText( const wxString &str, wxDouble x, wxDouble y )
 void wxGDIPlusContext::GetTextExtent( const wxString &str, wxDouble *width, wxDouble *height,
                                      wxDouble *descent, wxDouble *externalLeading ) const
 {
+    wxCHECK_RET( !m_font.IsNull(), wxT("wxGDIPlusContext::GetTextExtent - no valid font set") );
+
     wxWCharBuffer s = str.wc_str( *wxConvUI );
     FontFamily ffamily ;
     Font* f = ((wxGDIPlusFontData*)m_font.GetRefData())->GetGDIPlusFont();
@@ -1302,6 +1467,8 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
 {
     widths.Empty();
     widths.Add(0, text.length());
+
+    wxCHECK_RET( !m_font.IsNull(), wxT("wxGDIPlusContext::GetPartialTextExtents - no valid font set") );
 
     if (text.empty())
         return;
@@ -1430,8 +1597,7 @@ public :
     // sets the font
     virtual wxGraphicsFont CreateFont( const wxFont &font , const wxColour &col = *wxBLACK ) ;
 
-    virtual wxGraphicsBitmap CreateBitmap( const wxBitmap &bitmap ) ;
-
+    wxGraphicsBitmap CreateBitmap( const wxBitmap &bmp ) ;
 protected :
     void EnsureIsLoaded();
     void Load();
@@ -1471,7 +1637,7 @@ void wxGDIPlusRenderer::Load()
 {
     GdiplusStartupInput input;
     GdiplusStartupOutput output;
-    GdiplusStartup(&m_gditoken,&input,&output);
+    GdiplusStartup(&m_gditoken, &input, &output);
     m_loaded = true;
 }
 
@@ -1608,17 +1774,18 @@ wxGraphicsFont wxGDIPlusRenderer::CreateFont( const wxFont &font , const wxColou
         return wxNullGraphicsFont;
 }
 
-wxGraphicsBitmap wxGDIPlusRenderer::CreateBitmap( const wxBitmap &bitmap )
+#if !wxUSE_CAIRO
+wxGraphicsBitmap wxGraphicsRenderer::CreateBitmap( const wxBitmap& bmp )
 {
-    EnsureIsLoaded();
-    if ( bitmap.Ok() )
+    if ( bmp.Ok() )
     {
         wxGraphicsBitmap p;
-        p.SetRefData(new wxGDIPlusBitmapData( this , bitmap ));
+        p.SetRefData(new wxGDIPlusBitmapData( this , bmp ));
         return p;
     }
     else
         return wxNullGraphicsBitmap;
 }
+#endif
 
 #endif  // wxUSE_GRAPHICS_CONTEXT

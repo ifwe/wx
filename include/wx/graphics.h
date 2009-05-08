@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Stefan Csomor
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: graphics.h 60190 2009-04-16 00:57:35Z KO $
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,6 @@
 #include "wx/dynarray.h"
 
 class WXDLLIMPEXP_CORE wxDC;
-class WXDLLIMPEXP_CORE wxWindowDC;
 class WXDLLIMPEXP_CORE wxMemoryDC;
 class WXDLLIMPEXP_CORE wxGraphicsContext;
 class WXDLLIMPEXP_CORE wxGraphicsPath;
@@ -65,6 +64,10 @@ class WXDLLIMPEXP_CORE wxGraphicsObject : public wxObject
 {
 public :
     wxGraphicsObject() ;
+#if wxABI_VERSION >= 20810
+    wxGraphicsObject( const wxGraphicsObject& other) : wxObject( other ) {}
+    wxGraphicsObject& operator= (const wxGraphicsObject & other) { Ref(other); return *this;}
+#endif
     wxGraphicsObject( wxGraphicsRenderer* renderer ) ;
     virtual ~wxGraphicsObject() ;
 
@@ -84,6 +87,10 @@ class WXDLLIMPEXP_CORE wxGraphicsPen : public wxGraphicsObject
 {
 public :
     wxGraphicsPen() {}
+#if wxABI_VERSION >= 20810
+    wxGraphicsPen( const wxGraphicsPen& other) : wxGraphicsObject( other ) {}
+    wxGraphicsPen& operator= (const wxGraphicsPen & other) { Ref(other); return *this;}
+#endif
     virtual ~wxGraphicsPen() {}
 private :
     DECLARE_DYNAMIC_CLASS(wxGraphicsPen)
@@ -95,6 +102,10 @@ class WXDLLIMPEXP_CORE wxGraphicsBrush : public wxGraphicsObject
 {
 public :
     wxGraphicsBrush() {}
+#if wxABI_VERSION >= 20810
+    wxGraphicsBrush( const wxGraphicsBrush& other) : wxGraphicsObject( other ) {}
+    wxGraphicsBrush& operator= (const wxGraphicsBrush & other) { Ref(other); return *this;}
+#endif
     virtual ~wxGraphicsBrush() {}
 private :
     DECLARE_DYNAMIC_CLASS(wxGraphicsBrush)
@@ -106,6 +117,10 @@ class WXDLLIMPEXP_CORE wxGraphicsFont : public wxGraphicsObject
 {
 public :
     wxGraphicsFont() {}
+#if wxABI_VERSION >= 20810
+    wxGraphicsFont( const wxGraphicsFont& other) : wxGraphicsObject( other ) {}
+    wxGraphicsFont& operator= (const wxGraphicsFont & other) { Ref(other); return *this;}
+#endif
     virtual ~wxGraphicsFont() {}
 private :
     DECLARE_DYNAMIC_CLASS(wxGraphicsFont)
@@ -117,7 +132,13 @@ class WXDLLIMPEXP_CORE wxGraphicsBitmap : public wxGraphicsObject
 {
 public :
     wxGraphicsBitmap() {}
+#if wxABI_VERSION >= 20810
+    wxGraphicsBitmap( const wxGraphicsBitmap& other) : wxGraphicsObject( other ) {}
+    wxGraphicsBitmap& operator= (const wxGraphicsBitmap & other) { Ref(other); return *this;}
+#endif
     virtual ~wxGraphicsBitmap() {}
+
+    bool GetSolidColor(wxColour& colour) const;
 private :
     DECLARE_DYNAMIC_CLASS(wxGraphicsBitmap)
 } ;
@@ -183,6 +204,10 @@ class WXDLLIMPEXP_CORE wxGraphicsMatrix : public wxGraphicsObject
 {
 public :
     wxGraphicsMatrix() {}
+#if wxABI_VERSION >= 20810
+    wxGraphicsMatrix( const wxGraphicsMatrix& other) : wxGraphicsObject( other ) {}
+    wxGraphicsMatrix& operator= (const wxGraphicsMatrix & other) { Ref(other); return *this;}
+#endif
 
     virtual ~wxGraphicsMatrix() {}
 
@@ -318,6 +343,10 @@ class WXDLLIMPEXP_CORE wxGraphicsPath : public wxGraphicsObject
 {
 public :
     wxGraphicsPath()  {}
+#if wxABI_VERSION >= 20810
+    wxGraphicsPath( const wxGraphicsPath& other) : wxGraphicsObject( other ) {}
+    wxGraphicsPath& operator= (const wxGraphicsPath & other) { Ref(other); return *this;}
+#endif
     virtual ~wxGraphicsPath() {}
 
     //
@@ -441,7 +470,9 @@ public:
     // sets the font
     virtual wxGraphicsFont CreateFont( const wxFont &font , const wxColour &col = *wxBLACK ) const;
 
-    virtual wxGraphicsBitmap CreateBitmap( const wxBitmap &bitmap ) const;
+#if wxABI_VERSION >= 20809
+    wxGraphicsBitmap CreateBitmap( const wxBitmap &bitmap ) const;
+#endif
 
     //virtual wxGraphicsBitmap CreateSubBitmap( const wxGraphicsBitmap &bitmap, wxDouble x, wxDouble y, wxDouble w, wxDouble h  ) const;
 
@@ -538,15 +569,14 @@ public:
     virtual void GetTextExtent( const wxString &text, wxDouble *width, wxDouble *height,
         wxDouble *descent, wxDouble *externalLeading ) const  = 0;
 
-    virtual void GetMultiLineTextExtent(const wxString& text, wxDouble *x, wxDouble *y,
-        wxDouble *h) const;
-
     virtual void GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const = 0;
 
     //
     // image support
     //
-    virtual void DrawBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h ) = 0;
+#if wxABI_VERSION >= 20809
+    void DrawGraphicsBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h );
+#endif
 
     virtual void DrawBitmap( const wxBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h ) = 0;
 
@@ -604,6 +634,10 @@ class WXDLLIMPEXP_CORE wxGraphicsFigure : public wxGraphicsObject
 {
 public :
     wxGraphicsFigure(wxGraphicsRenderer* renderer) ;
+#if wxABI_VERSION >= 20810
+    wxGraphicsFigure( const wxGraphicsFigure& other) : wxGraphicsObject( other ) {}
+    wxGraphicsFigure& operator= (const wxGraphicsFigure & other) { Ref(other); return *this;}
+#endif
 
     virtual ~wxGraphicsFigure() ;
 
@@ -644,9 +678,12 @@ public :
 
     static wxGraphicsRenderer* GetDefaultRenderer();
 
+#if wxABI_VERSION >= 20811
+    static wxGraphicsRenderer* GetCairoRenderer();
+#endif
     // Context
 
-    virtual wxGraphicsContext * CreateContext( const wxDC& dc) = 0;
+    virtual wxGraphicsContext * CreateContext( const wxDC& dc) = 0 ;
 #ifdef __WXMSW__
     virtual wxGraphicsContext * CreateContext( const wxMemoryDC& dc) = 0 ;
 #endif
@@ -686,7 +723,10 @@ public :
    // sets the font
     virtual wxGraphicsFont CreateFont( const wxFont &font , const wxColour &col = *wxBLACK ) = 0;
 
-    virtual wxGraphicsBitmap CreateBitmap( const wxBitmap &bmp ) = 0;
+#if wxABI_VERSION >= 20809
+    wxGraphicsBitmap CreateBitmap( const wxBitmap &bmp );
+#endif
+
 private :
     DECLARE_NO_COPY_CLASS(wxGraphicsRenderer)
     DECLARE_ABSTRACT_CLASS(wxGraphicsRenderer)
