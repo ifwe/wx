@@ -765,8 +765,15 @@ CachedBitmap* wxGDIPlusBitmapData::GetCachedBitmap(Graphics* context, const wxSi
         // Otherwise, we need to resample the image.
         Bitmap* resized = new Bitmap(size.x, size.y, m_bitmap->GetPixelFormat());
         Graphics* graphics = Graphics::FromImage(resized);
-        graphics->SetSmoothingMode(SmoothingModeHighQuality);
-        graphics->SetInterpolationMode(InterpolationModeHighQualityBicubic);
+
+        // Only use HighQualityBicubic when downsampling.
+        InterpolationMode mode;
+        if (size.x < (int)m_bitmap->GetWidth() && size.y < (int)m_bitmap->GetHeight())
+            mode = InterpolationModeHighQualityBicubic;
+        else
+            mode = InterpolationModeBicubic;
+
+        graphics->SetInterpolationMode(mode);
         graphics->DrawImage(m_bitmap, 0, 0, size.x, size.y);
         m_cachedBitmap = new CachedBitmap(resized, context);
         delete resized;
@@ -1250,21 +1257,6 @@ void wxGraphicsContext::DrawGraphicsBitmap( const wxGraphicsBitmap &bmp, wxDoubl
 
 void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h)
 {
-    /*
-    Bitmap* image = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData())->GetGDIPlusBitmap();
-    if ( image )
-    {
-        if( image->GetWidth() != (UINT) w || image->GetHeight() != (UINT) h )
-        {
-            Rect drawRect((REAL) x, (REAL)y, (REAL)w, (REAL)h);
-            m_context->SetPixelOffsetMode( PixelOffsetModeNone );
-            m_context->DrawImage(image, drawRect, 0 , 0 , image->GetWidth()-1, image->GetHeight()-1, UnitPixel ) ;
-            m_context->SetPixelOffsetMode( PixelOffsetModeHalf );
-        }
-        else
-            m_context->DrawImage(image,(REAL) x,(REAL) y,(REAL) w,(REAL) h) ;
-    }
-    */
     wxGDIPlusBitmapData* bitmapData = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData());
 
     CachedBitmap* cachedBitmap = bitmapData->GetCachedBitmap(m_context, wxSize(w, h));
@@ -1279,6 +1271,13 @@ bool wxGraphicsBitmap::GetSolidColor(wxColour& colour) const
 {
     return static_cast<wxGDIPlusBitmapData*>(GetRefData())->GetSolidColor(colour);
 }
+
+void* wxGraphicsBitmap::GetNativeBitmap() const
+{
+    wxGDIPlusBitmapData* data = static_cast<wxGDIPlusBitmapData*>(GetRefData());
+    return data ? data->GetGDIPlusBitmap() : 0;
+}
+
 
 #define UNPREMULTIPLY(p, a) ((a) ? ((p) * 0xff / (a)) : (p))    
 

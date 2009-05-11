@@ -139,6 +139,11 @@ public :
     virtual ~wxGraphicsBitmap() {}
 
     bool GetSolidColor(wxColour& colour) const;
+
+#ifdef __WXMSW__
+    void* GetNativeBitmap() const;
+#endif
+
 private :
     DECLARE_DYNAMIC_CLASS(wxGraphicsBitmap)
 } ;
