@@ -771,7 +771,7 @@ CachedBitmap* wxGDIPlusBitmapData::GetCachedBitmap(Graphics* context, const wxSi
         if (size.x < (int)m_bitmap->GetWidth() && size.y < (int)m_bitmap->GetHeight())
             mode = InterpolationModeHighQualityBicubic;
         else
-            mode = InterpolationModeBicubic;
+            mode = InterpolationModeBilinear;
 
         graphics->SetInterpolationMode(mode);
         graphics->DrawImage(m_bitmap, 0, 0, size.x, size.y);
