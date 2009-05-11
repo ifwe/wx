@@ -765,6 +765,7 @@ CachedBitmap* wxGDIPlusBitmapData::GetCachedBitmap(Graphics* context, const wxSi
         // Otherwise, we need to resample the image.
         Bitmap* resized = new Bitmap(size.x, size.y, m_bitmap->GetPixelFormat());
         Graphics* graphics = Graphics::FromImage(resized);
+        graphics->Clear(Color(0, 0, 0, 0));
 
         // Only use HighQualityBicubic when downsampling.
         InterpolationMode mode;
@@ -1257,6 +1258,21 @@ void wxGraphicsContext::DrawGraphicsBitmap( const wxGraphicsBitmap &bmp, wxDoubl
 
 void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h)
 {
+#if 1
+    Bitmap* image = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData())->GetGDIPlusBitmap();
+    if ( image )
+    {
+        if( image->GetWidth() != (UINT) w || image->GetHeight() != (UINT) h )
+        {
+            Rect drawRect((REAL) x, (REAL)y, (REAL)w, (REAL)h);
+            m_context->SetPixelOffsetMode( PixelOffsetModeNone );
+            m_context->DrawImage(image, drawRect, 0 , 0 , image->GetWidth()-1, image->GetHeight()-1, UnitPixel ) ;
+            m_context->SetPixelOffsetMode( PixelOffsetModeHalf );
+        }
+        else
+            m_context->DrawImage(image,(REAL) x,(REAL) y,(REAL) w,(REAL) h) ;
+    }
+#else
     wxGDIPlusBitmapData* bitmapData = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData());
 
     CachedBitmap* cachedBitmap = bitmapData->GetCachedBitmap(m_context, wxSize(w, h));
@@ -1265,6 +1281,7 @@ void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, w
         m_context->DrawCachedBitmap(cachedBitmap, x, y);
         m_context->SetPixelOffsetMode(PixelOffsetModeHalf);
     }
+#endif
 }
 
 bool wxGraphicsBitmap::GetSolidColor(wxColour& colour) const
