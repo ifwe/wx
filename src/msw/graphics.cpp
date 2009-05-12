@@ -1264,9 +1264,17 @@ void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, w
     {
         if( image->GetWidth() != (UINT) w || image->GetHeight() != (UINT) h )
         {
+            // Only use HighQualityBicubic when downsampling.
+            InterpolationMode mode;
+            if (x < (int)image->GetWidth() && y < (int)image->GetHeight())
+                mode = InterpolationModeHighQualityBicubic;
+            else
+                mode = InterpolationModeBicubic;
+
             Rect drawRect((REAL) x, (REAL)y, (REAL)w, (REAL)h);
+            m_context->SetInterpolationMode(mode);
             m_context->SetPixelOffsetMode( PixelOffsetModeNone );
-            m_context->DrawImage(image, drawRect, 0 , 0 , image->GetWidth()-1, image->GetHeight()-1, UnitPixel ) ;
+            m_context->DrawImage(image, drawRect, 0, 0, image->GetWidth()-1, image->GetHeight()-1, UnitPixel ) ;
             m_context->SetPixelOffsetMode( PixelOffsetModeHalf );
         }
         else
