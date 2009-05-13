@@ -1132,6 +1132,7 @@ void wxGDIPlusContext::SetDefaults()
     m_context->SetTextRenderingHint(TextRenderingHintSystemDefault);
     m_context->SetPixelOffsetMode(PixelOffsetModeHalf);
     m_context->SetSmoothingMode(SmoothingModeHighQuality);
+    m_context->SetCompositingQuality(CompositingQualityHighQuality);
     m_state1 = m_context->Save();
     m_state2 = m_context->Save();
 }
@@ -1260,9 +1261,9 @@ void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, w
 {
 #if 1
     Bitmap* image = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData())->GetGDIPlusBitmap();
-    if ( image )
+    if (image)
     {
-        if( image->GetWidth() != (UINT) w || image->GetHeight() != (UINT) h )
+        if(image->GetWidth() != (UINT) w || image->GetHeight() != (UINT) h)
         {
             // Only use HighQualityBicubic when downsampling.
             InterpolationMode mode;
@@ -1273,12 +1274,12 @@ void wxGDIPlusContext::DrawGraphicsBitmapInternal(const wxGraphicsBitmap &bmp, w
 
             Rect drawRect((REAL) x, (REAL)y, (REAL)w, (REAL)h);
             m_context->SetInterpolationMode(mode);
-            m_context->SetPixelOffsetMode( PixelOffsetModeNone );
-            m_context->DrawImage(image, drawRect, 0, 0, image->GetWidth()-1, image->GetHeight()-1, UnitPixel ) ;
-            m_context->SetPixelOffsetMode( PixelOffsetModeHalf );
+            m_context->SetPixelOffsetMode(PixelOffsetModeNone);
+            m_context->DrawImage(image, drawRect, 0, 0, image->GetWidth(), image->GetHeight(), UnitPixel) ;
+            m_context->SetPixelOffsetMode(PixelOffsetModeHalf);
         }
         else
-            m_context->DrawImage(image,(REAL) x,(REAL) y,(REAL) w,(REAL) h) ;
+            m_context->DrawImage(image, (REAL)x, (REAL)y, (REAL)w, (REAL)h) ;
     }
 #else
     wxGDIPlusBitmapData* bitmapData = static_cast<wxGDIPlusBitmapData*>(bmp.GetRefData());
