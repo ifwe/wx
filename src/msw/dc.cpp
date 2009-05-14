@@ -134,6 +134,54 @@ static bool AlphaBlt(HDC hdcDst,
                      int srcX, int srcY, HDC hdcSrc,
                      const wxBitmap& bmpSrc);
 
+typedef BOOL (WINAPI *AlphaBlend_t)(HDC,int,int,int,int,
+                                    HDC,int,int,int,int,
+                                    BLENDFUNCTION);
+
+// helper class to cache dynamically loaded libraries and not attempt reloading
+// them if it fails
+class wxOnceOnlyDLLLoader
+{
+public:
+    // ctor argument must be a literal string as we don't make a copy of it!
+    wxOnceOnlyDLLLoader(const wxChar *dllName)
+        : m_dllName(dllName)
+    {
+    }
+
+
+    // return the symbol with the given name or NULL if the DLL not loaded
+    // or symbol not present
+    void *GetSymbol(const wxChar *name)
+    {
+        // we're prepared to handle errors here
+        wxLogNull noLog;
+
+        if ( m_dllName )
+        {
+            m_dll.Load(m_dllName);
+
+            // reset the name whether we succeeded or failed so that we don't
+            // try again the next time
+            m_dllName = NULL;
+        }
+
+        return m_dll.IsLoaded() ? m_dll.GetSymbol(name) : NULL;
+    }
+
+private:
+    wxDynamicLibrary m_dll;
+    const wxChar *m_dllName;
+};
+static wxOnceOnlyDLLLoader wxMSIMG32DLL(_T("msimg32"));
+
+static const AlphaBlend_t getAlphaBlendFunc()
+{
+    static AlphaBlend_t
+        pfnAlphaBlend = (AlphaBlend_t)wxMSIMG32DLL.GetSymbol(_T("AlphaBlend"));
+    return pfnAlphaBlend;
+}
+
 #ifdef wxHAVE_RAW_BITMAP
 
 // our (limited) AlphaBlend() replacement for Windows versions not providing it
@@ -200,44 +248,8 @@ private:
     DECLARE_NO_COPY_CLASS(StretchBltModeChanger)
 };
 
-// helper class to cache dynamically loaded libraries and not attempt reloading
-// them if it fails
-class wxOnceOnlyDLLLoader
-{
-public:
-    // ctor argument must be a literal string as we don't make a copy of it!
-    wxOnceOnlyDLLLoader(const wxChar *dllName)
-        : m_dllName(dllName)
-    {
-    }
-
-
-    // return the symbol with the given name or NULL if the DLL not loaded
-    // or symbol not present
-    void *GetSymbol(const wxChar *name)
-    {
-        // we're prepared to handle errors here
-        wxLogNull noLog;
-
-        if ( m_dllName )
-        {
-            m_dll.Load(m_dllName);
-
-            // reset the name whether we succeeded or failed so that we don't
-            // try again the next time
-            m_dllName = NULL;
-        }
-
-        return m_dll.IsLoaded() ? m_dll.GetSymbol(name) : NULL;
-    }
-
-private:
-    wxDynamicLibrary m_dll;
-    const wxChar *m_dllName;
-};
 
 static wxOnceOnlyDLLLoader wxGDI32DLL(_T("gdi32"));
-static wxOnceOnlyDLLLoader wxMSIMG32DLL(_T("msimg32"));
 
 // ===========================================================================
 // implementation
@@ -917,6 +929,42 @@ void wxDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
 
     if ((m_logicalFunction == wxCOPY) && (m_pen.GetStyle() == wxTRANSPARENT))
     {
+        wxColour brushColor(m_brush.GetColour());
+        if (brushColor.Alpha() < 255) {
+            AlphaBlend_t pfnAlphaBlend = getAlphaBlendFunc();
+            if (pfnAlphaBlend)
+            {
+                BLENDFUNCTION bf;
+                bf.BlendOp = AC_SRC_OVER;
+                bf.BlendFlags = 0;
+                bf.SourceConstantAlpha = brushColor.Alpha();
+                bf.AlphaFormat = 0; // 0 here means use SourceConstantAlpha as the only source of alpha values
+
+                CompatibleBitmap colorBitmap(GetHdc(), width, height);
+                MemoryHDC hdcSrc(GetHdc());
+                bool success = false;
+                {
+                    SelectInHDC selector(hdcSrc, colorBitmap);
+
+                    RECT r;
+                    r.left = 0;
+                    r.top = 0;
+                    r.right = width;
+                    r.bottom = height;
+
+                    FillRect(hdcSrc, &r, (HBRUSH)m_brush.GetResourceHandle());
+
+                    if (pfnAlphaBlend(GetHdc(), x, y, width, height,
+                                      hdcSrc, 0, 0, width, height,
+                                      bf))
+                        success = true;
+                }
+
+                if (success)
+                    return;
+            }
+        }
+
         RECT rect;
         rect.left = XLOG2DEV(x);
         rect.top = YLOG2DEV(y);
@@ -2563,12 +2611,8 @@ static bool AlphaBlt(HDC hdcDst,
     // do we have AlphaBlend() and company in the headers?
 #if defined(AC_SRC_OVER) && wxUSE_DYNLIB_CLASS
     // yes, now try to see if we have it during run-time
-    typedef BOOL (WINAPI *AlphaBlend_t)(HDC,int,int,int,int,
-                                        HDC,int,int,int,int,
-                                        BLENDFUNCTION);
 
-    static AlphaBlend_t
-        pfnAlphaBlend = (AlphaBlend_t)wxMSIMG32DLL.GetSymbol(_T("AlphaBlend"));
+    AlphaBlend_t pfnAlphaBlend = getAlphaBlendFunc();
     if ( pfnAlphaBlend )
     {
         BLENDFUNCTION bf;
