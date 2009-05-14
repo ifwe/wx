@@ -934,34 +934,24 @@ void wxDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
             AlphaBlend_t pfnAlphaBlend = getAlphaBlendFunc();
             if (pfnAlphaBlend)
             {
+                // Create a bitmap filled with the solid color (no alpha)
+                CompatibleBitmap colorBitmap(GetHdc(), width, height);
+                MemoryHDC hdcSrc(GetHdc());
+                SelectInHDC selector(hdcSrc, colorBitmap);
+
+                RECT r = {0, 0, width, height};
+                FillRect(hdcSrc, &r, (HBRUSH)m_brush.GetResourceHandle());
+
                 BLENDFUNCTION bf;
                 bf.BlendOp = AC_SRC_OVER;
                 bf.BlendFlags = 0;
                 bf.SourceConstantAlpha = brushColor.Alpha();
                 bf.AlphaFormat = 0; // 0 here means use SourceConstantAlpha as the only source of alpha values
 
-                CompatibleBitmap colorBitmap(GetHdc(), width, height);
-                MemoryHDC hdcSrc(GetHdc());
-                bool success = false;
-                {
-                    SelectInHDC selector(hdcSrc, colorBitmap);
-
-                    RECT r;
-                    r.left = 0;
-                    r.top = 0;
-                    r.right = width;
-                    r.bottom = height;
-
-                    FillRect(hdcSrc, &r, (HBRUSH)m_brush.GetResourceHandle());
-
-                    if (pfnAlphaBlend(GetHdc(), x, y, width, height,
-                                      hdcSrc, 0, 0, width, height,
-                                      bf))
-                        success = true;
-                }
-
-                if (success)
-                    return;
+                if (pfnAlphaBlend(GetHdc(), x, y, width, height, // dest coords
+                                  hdcSrc, 0, 0, width, height,   // src coords
+                                  bf))
+                    goto done;
             }
         }
 
@@ -991,7 +981,7 @@ void wxDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
         (void)Rectangle(GetHdc(), XLOG2DEV(x), YLOG2DEV(y), XLOG2DEV(x2), YLOG2DEV(y2));
     }
 
-
+done:
     CalcBoundingBox(x, y);
     CalcBoundingBox(x2, y2);
 }
