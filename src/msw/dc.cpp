@@ -132,7 +132,7 @@ static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
 static bool AlphaBlt(HDC hdcDst,
                      int x, int y, int w, int h,
                      int srcX, int srcY, HDC hdcSrc,
-                     const wxBitmap& bmpSrc);
+                     const wxBitmap& bmpSrc, unsigned char alpha = 255);
 
 typedef BOOL (WINAPI *AlphaBlend_t)(HDC,int,int,int,int,
                                     HDC,int,int,int,int,
@@ -1212,7 +1212,7 @@ void wxDC::DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y)
     CalcBoundingBox(x + icon.GetWidth(), y + icon.GetHeight());
 }
 
-void wxDC::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask )
+void wxDC::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask, unsigned char alpha )
 {
     WXMICROWIN_CHECK_HDC
 
@@ -1232,7 +1232,7 @@ void wxDC::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask
         MemoryHDC hdcMem;
         SelectInHDC select(hdcMem, GetHbitmapOf(bmp));
 
-        if ( AlphaBlt(GetHdc(), x, y, width, height, 0, 0, hdcMem, bmp) )
+        if ( AlphaBlt(GetHdc(), x, y, width, height, 0, 0, hdcMem, bmp, alpha) )
             return;
     }
 
@@ -2593,7 +2593,8 @@ static int warnedAboutSlow = 0;
 static bool AlphaBlt(HDC hdcDst,
                      int x, int y, int width, int height,
                      int srcX, int srcY, HDC hdcSrc,
-                     const wxBitmap& bmp)
+                     const wxBitmap& bmp,
+                     unsigned char alpha)
 {
     wxASSERT_MSG( bmp.Ok() && bmp.HasAlpha(), _T("AlphaBlt(): invalid bitmap") );
     wxASSERT_MSG( hdcDst && hdcSrc, _T("AlphaBlt(): invalid HDC") );
@@ -2608,7 +2609,7 @@ static bool AlphaBlt(HDC hdcDst,
         BLENDFUNCTION bf;
         bf.BlendOp = AC_SRC_OVER;
         bf.BlendFlags = 0;
-        bf.SourceConstantAlpha = 0xff;
+        bf.SourceConstantAlpha = alpha;
         bf.AlphaFormat = AC_SRC_ALPHA;
 
         if ( pfnAlphaBlend(hdcDst, x, y, width, height,

@@ -267,11 +267,11 @@ public:
         { DoDrawIcon(icon, pt.x, pt.y); }
 
     void DrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
-                    bool useMask = false)
-        { DoDrawBitmap(bmp, x, y, useMask); }
+                    bool useMask = false, unsigned char alpha = 255)
+        { DoDrawBitmap(bmp, x, y, useMask, alpha); }
     void DrawBitmap(const wxBitmap &bmp, const wxPoint& pt,
-                    bool useMask = false)
-        { DoDrawBitmap(bmp, pt.x, pt.y, useMask); }
+                    bool useMask = false, unsigned char alpha = 255)
+        { DoDrawBitmap(bmp, pt.x, pt.y, useMask, alpha); }
 
     void DrawText(const wxString& text, wxCoord x, wxCoord y)
         { DoDrawText(text, x, y); }
@@ -720,7 +720,7 @@ protected:
 
     virtual void DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y) = 0;
     virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
-                              bool useMask = false) = 0;
+                              bool useMask = false, unsigned char alpha = 255) = 0;
 
     virtual void DoDrawText(const wxString& text, wxCoord x, wxCoord y) = 0;
     virtual void DoDrawRotatedText(const wxString& text,

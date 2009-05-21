@@ -204,7 +204,7 @@ protected:
 
     virtual void DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y);
     virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
-                              bool useMask = false);
+                              bool useMask = false, unsigned char alpha = 255);
 
     virtual void DoDrawText(const wxString& text, wxCoord x, wxCoord y);
     virtual void DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y,
