@@ -2813,7 +2813,12 @@ bool wxTextCtrl::GetStyle(long position, wxTextAttr& style)
 
 
     LOGFONT lf;
-    lf.lfHeight = cf.yHeight;
+
+    // convert from twips to points
+    int pointSize = cf.yHeight / 20;
+    const int ppInch = ::GetDeviceCaps(ScreenHDC(), LOGPIXELSY);
+    lf.lfHeight = -(int)((pointSize*((double)ppInch)/72.0) + 0.5);
+
     lf.lfWidth = 0;
     lf.lfCharSet = ANSI_CHARSET; // FIXME: how to get correct charset?
     lf.lfClipPrecision = 0;
