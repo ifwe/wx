@@ -2416,8 +2416,24 @@ bool wxWindowMSW::MSWProcessMessage(WXMSG* pMsg)
     return false;
 }
 
+static bool gs_inMouseWheelHack = false;
+
 bool wxWindowMSW::MSWTranslateMessage(WXMSG* pMsg)
 {
+    // Always forward mouse wheel events to the window under the pointer
+    if (!gs_inMouseWheelHack && pMsg->message == WM_MOUSEWHEEL) {
+        gs_inMouseWheelHack = true;
+        wxPoint screenPoint(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam));
+        if (wxWindow* windowUnderPointer = wxFindWindowAtPoint(screenPoint)) {
+            if (windowUnderPointer != this) {
+                SendMessage((HWND)windowUnderPointer->GetHWND(), WM_MOUSEWHEEL, pMsg->wParam, pMsg->lParam);
+                gs_inMouseWheelHack = false;
+                return true;
+            }
+        }
+        gs_inMouseWheelHack = false;
+    }
+
 #if wxUSE_ACCEL && !defined(__WXUNIVERSAL__)
     return m_acceleratorTable.Translate(this, pMsg);
 #else
