@@ -1515,9 +1515,11 @@ bool wxTextCtrl::DoLoadFile(const wxString& file, int fileType)
 void wxTextCtrl::Replace(long from, long to, const wxString& value)
 {
     // Set selection and remove it
+    ::SendMessage(GetHwnd(), EM_HIDESELECTION, 1, 0);
     DoSetSelection(from, to, false /* don't scroll caret into view */);
 
     DoWriteText(value);
+    ::SendMessage(GetHwnd(), EM_HIDESELECTION, 0, 0);
 }
 
 void wxTextCtrl::Remove(long from, long to)
@@ -2563,6 +2565,9 @@ bool wxTextCtrl::SetStyle(long start, long end, const wxTextAttr& style)
 
     if ( changeSel )
     {
+        // temporary hide selection so that we don't visible flash when selecting text.
+        ::SendMessage(GetHwnd(), EM_HIDESELECTION, 1, 0);
+
         DoSetSelection(start, end, false /* don't scroll caret into view */);
     }
 
@@ -2742,6 +2747,9 @@ bool wxTextCtrl::SetStyle(long start, long end, const wxTextAttr& style)
     {
         // restore the original selection
         DoSetSelection(startOld, endOld, false);
+
+        // restore selection visibility
+        ::SendMessage(GetHwnd(), EM_HIDESELECTION, 0, 0);
     }
 
     return ok;
@@ -2804,6 +2812,8 @@ bool wxTextCtrl::GetStyle(long position, wxTextAttr& style)
 
     if ( changeSel )
     {
+        ::SendMessage(GetHwnd(), EM_HIDESELECTION, 1, 0);
+
         DoSetSelection(position, position+1, false /* don't scroll caret into view */);
     }
 
@@ -2910,6 +2920,8 @@ bool wxTextCtrl::GetStyle(long position, wxTextAttr& style)
     {
         // restore the original selection
         DoSetSelection(startOld, endOld, false);
+
+        ::SendMessage(GetHwnd(), EM_HIDESELECTION, 0, 0);
     }
 
     return true;
