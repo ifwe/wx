@@ -160,38 +160,17 @@ void wxProcessTimer(wxTimer& timer)
     }
 }
 
-WX_DEFINE_ARRAY_PTR(wxTimer*, ArrayTimers);
-
-static ArrayTimers* getPendingTimers()
-{
-    static ArrayTimers s_timers;
-    return &s_timers;
-}
-
 void WINAPI
 wxTimerProc(HWND WXUNUSED(hwnd),
             UINT WXUNUSED(msg),
             UINT_PTR idTimer,
             DWORD WXUNUSED(dwTime))
 {
-    static bool inTimerProc = false;
     wxTimerMap::iterator node = TimerMap().find((unsigned long)idTimer);
 
     wxCHECK_RET( node != TimerMap().end(), wxT("bogus timer id in wxTimerProc") );
 
-    ArrayTimers* pendingTimers = getPendingTimers();
-    if (inTimerProc) {
-        pendingTimers->Add(node->second);
-    } else {
-        inTimerProc = true;
-        wxProcessTimer(*(node->second));
-
-        for (size_t i = 0; i < pendingTimers->GetCount(); ++i)
-            wxProcessTimer(*pendingTimers->Item(i));
-
-        pendingTimers->Clear();
-        inTimerProc = false;
-    }
+    wxProcessTimer(*(node->second));
 }
 
 #endif // wxUSE_TIMER
