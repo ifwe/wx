@@ -404,7 +404,7 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
 
     // ask the user
 #if wxUSE_FONTDLG
-    if ( interactive )
+    if ( 0 && interactive ) // disabled for Digsby
     {
         wxString title(m_titleDialog);
         if ( !title )
