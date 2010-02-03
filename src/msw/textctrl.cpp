@@ -2599,9 +2599,21 @@ bool wxTextCtrl::SetStyle(long start, long end, const wxTextAttr& style)
     {
         // VZ: CFM_CHARSET doesn't seem to do anything at all in RichEdit 2.0
         //     but using it doesn't seem to hurt neither so leaving it for now
+        
+        // only set CFM_ styles if the wxTextAttr has its mask value set
+#define WXTOWINSTYLE(wxstyle, winstyle) do { if (style.GetFlags() & (wxstyle)) cf.dwMask |= (winstyle); } while (0)
 
-        cf.dwMask |= CFM_FACE | CFM_SIZE | CFM_CHARSET |
-                     CFM_ITALIC | CFM_BOLD | CFM_UNDERLINE;
+        if ( startOld != endOld ) {
+            cf.dwMask |= CFM_CHARSET;
+            WXTOWINSTYLE(wxTEXT_ATTR_FONT_FACE, CFM_FACE);
+            WXTOWINSTYLE(wxTEXT_ATTR_FONT_SIZE, CFM_SIZE);
+            WXTOWINSTYLE(wxTEXT_ATTR_FONT_WEIGHT, CFM_BOLD);
+            WXTOWINSTYLE(wxTEXT_ATTR_FONT_ITALIC, CFM_ITALIC);
+            WXTOWINSTYLE(wxTEXT_ATTR_FONT_UNDERLINE, CFM_UNDERLINE);
+        } else {
+            cf.dwMask |= CFM_FACE | CFM_SIZE | CFM_CHARSET |
+                         CFM_ITALIC | CFM_BOLD | CFM_UNDERLINE;
+        }
 
         // fill in data from LOGFONT but recalculate lfHeight because we need
         // the real height in twips and not the negative number which
