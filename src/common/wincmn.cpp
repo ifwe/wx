@@ -2366,6 +2366,7 @@ static void DrawSizers(wxWindowBase *win)
 // process special middle clicks
 void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 {
+#if 0
     if ( event.ControlDown() && event.AltDown() )
     {
 #ifdef __WXDEBUG__
@@ -2415,6 +2416,7 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
     }
     else
 #endif // wxUSE_MSGDLG
+#endif
     {
         event.Skip();
     }
