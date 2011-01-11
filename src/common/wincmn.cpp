@@ -1896,6 +1896,10 @@ void wxWindowBase::SetSizerAndFit(wxSizer *sizer, bool deleteOld)
 
 void wxWindowBase::SetContainingSizer(wxSizer* sizer)
 {
+    // Don't allow adding a window to one sizer, and then to another sizer.
+    if (sizer && m_containingSizer && m_containingSizer != sizer)
+        wxTrap();
+
     // adding a window to a sizer twice is going to result in fatal and
     // hard to debug problems later because when deleting the second
     // associated wxSizerItem we're going to dereference a dangling
